@@ -3,2913 +3,647 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#D4A843">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="PaddockPay">
   <title>PaddockPay</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <!-- Supabase JS — hosted locally, no CDN dependency -->
-  <script src="supabase.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ===== DESIGN SYSTEM ===== */
     :root {
-      --bg:      #1A1008;
-      --surface: #2C1A0E;
-      --border:  #4A3020;
-      --text:    #F2E4C4;
-      --muted:   #8A7060;
-      --wheat:   #D4A843;
-      --green:   #4A7C59;
-      --orange:  #D4823A;
-      --red:     #8B3A2A;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --bg:     #1A1008;
+      --card:   #251508;
+      --card2:  #2E1A0A;
+      --border: #3D2210;
+      --wheat:  #D4A843;
+      --wheat2: #B88A30;
+      --fg:     #F2E4C4;
+      --muted:  #7A6248;
+      --green:  #4E9A5A;
+      --red:    #C0392B;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
+    body {
       background: var(--bg);
-      color: var(--text);
+      color: var(--fg);
       font-family: 'DM Mono', monospace;
-      font-size: 15px;
-      line-height: 1.6;
+      min-height: 100vh;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
     }
 
-    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
-
-    a { color: var(--wheat); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    /* ===== LAYOUT ===== */
-    #app { min-height: 100vh; display: flex; flex-direction: column; }
-
-    .page { flex: 1; padding: 24px 20px; max-width: 640px; margin: 0 auto; width: 100%; }
-    .page-wide { flex: 1; padding: 24px 20px; max-width: 960px; margin: 0 auto; width: 100%; }
-
-    /* ===== COMPONENTS ===== */
-
-    /* Card */
-    .card {
-      background: var(--surface);
+    /* ── HEADER ── */
+    .hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--wheat);
+      letter-spacing: 0.5px;
+    }
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
       border: 1px solid var(--border);
+    }
+    .tab {
+      padding: 7px 18px;
       border-radius: 8px;
-      padding: 16px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab.on { background: var(--wheat); color: var(--bg); font-weight: 500; }
+
+    /* ── SCREENS ── */
+    .screen { display: none; max-width: 440px; margin: 0 auto; padding: 28px 20px 60px; }
+    .screen.on { display: block; }
+
+    /* ── JOSH SCREEN ── */
+    .date-block { text-align: center; margin-bottom: 36px; }
+    .date-weekday {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .date-full {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px;
+      color: var(--fg);
+    }
+
+    .big-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 32px 20px;
+      border-radius: 20px;
+      border: 2px solid var(--wheat);
+      background: transparent;
+      color: var(--wheat);
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 10px;
+    }
+    .big-btn:hover:not(:disabled) {
+      background: var(--wheat);
+      color: var(--bg);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,168,67,0.2);
+    }
+    .big-btn:active:not(:disabled) { transform: translateY(0); }
+    .big-btn.done {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+    .big-btn.done:hover { transform: none; box-shadow: none; background: var(--green); color: #fff; }
+
+    .undo-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 28px;
+      transition: color 0.15s;
+    }
+    .undo-btn:hover { color: var(--red); }
+
+    .sec-label {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
       margin-bottom: 12px;
     }
 
-    /* Button */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: opacity 0.15s, transform 0.1s;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-    .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-primary { background: var(--wheat); color: #1A1008; }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-    .btn-ghost:hover { border-color: var(--wheat); color: var(--wheat); }
-    .btn-danger { background: var(--red); color: var(--text); }
-    .btn-danger:hover { opacity: 0.85; }
-    .btn-full { width: 100%; }
-    .btn-sm { padding: 8px 14px; font-size: 13px; }
-
-    /* Badge */
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .badge-trial { background: rgba(212,168,67,0.2); color: var(--wheat); border: 1px solid rgba(212,168,67,0.4); }
-    .badge-active { background: rgba(74,124,89,0.2); color: #6BCB8B; border: 1px solid rgba(74,124,89,0.4); }
-    .badge-expired { background: rgba(139,58,42,0.2); color: #E07060; border: 1px solid rgba(139,58,42,0.4); }
-    .badge-pending { background: rgba(212,130,58,0.2); color: var(--orange); border: 1px solid rgba(212,130,58,0.4); }
-    .badge-paid { background: rgba(74,124,89,0.2); color: #6BCB8B; border: 1px solid rgba(74,124,89,0.4); }
-    .badge-draft { background: rgba(138,112,96,0.2); color: var(--muted); border: 1px solid rgba(138,112,96,0.3); }
-    .badge-sent { background: rgba(74,124,89,0.2); color: #6BCB8B; border: 1px solid rgba(74,124,89,0.4); }
-    .badge-offline { background: rgba(138,112,96,0.2); color: var(--muted); border: 1px solid rgba(138,112,96,0.3); }
-    .badge-void { background: rgba(139,58,42,0.15); color: var(--muted); border: 1px solid rgba(139,58,42,0.3); }
-
-    /* Form */
-    .form-group { margin-bottom: 16px; }
-    .form-label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .form-input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 11px 14px;
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      transition: border-color 0.15s;
-      -webkit-appearance: none;
-    }
-    .form-input:focus { outline: none; border-color: var(--wheat); }
-    .form-input::placeholder { color: var(--muted); }
-    .form-input.error { border-color: var(--red); }
-
-    .input-wrap { position: relative; }
-    .input-wrap .form-input { padding-right: 44px; }
-    .input-toggle {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 16px;
-      padding: 4px;
-    }
-
-    .form-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    .form-error { font-size: 12px; color: #E07060; margin-top: 4px; }
-
-    /* Password strength */
-    .pw-strength { margin-top: 6px; }
-    .pw-strength-bar {
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .pw-strength-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
-    .pw-strength-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-    /* Checkbox / Radio */
-    .radio-group { display: flex; flex-direction: column; gap: 10px; }
-    .radio-option {
+    .day-list { display: flex; flex-direction: column; gap: 6px; }
+    .day-row {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
-      padding: 12px 14px;
+      padding: 13px 16px;
+      background: var(--card);
+      border-radius: 12px;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: border-color 0.15s;
     }
-    .radio-option:hover { border-color: var(--wheat); }
-    .radio-option.selected { border-color: var(--wheat); background: rgba(212,168,67,0.06); }
-    .radio-option input { accent-color: var(--wheat); margin-top: 2px; flex-shrink: 0; }
-    .radio-label { font-size: 14px; }
-    .radio-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-    .checkbox-wrap {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      cursor: pointer;
-    }
-    .checkbox-wrap input[type=checkbox] { accent-color: var(--wheat); margin-top: 2px; flex-shrink: 0; }
-    .checkbox-label { font-size: 13px; color: var(--muted); }
-
-    /* Toggle */
-    .toggle-wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .toggle-label-group { flex: 1; }
-    .toggle-label { font-size: 14px; }
-    .toggle-desc { font-size: 12px; color: var(--muted); }
-    .toggle {
-      position: relative;
-      width: 44px;
-      height: 26px;
-      flex-shrink: 0;
-    }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider {
-      position: absolute;
-      inset: 0;
-      background: var(--border);
-      border-radius: 13px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .toggle-slider::before {
-      content: '';
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      left: 3px;
-      bottom: 3px;
-      background: var(--text);
-      border-radius: 50%;
-      transition: 0.2s;
-    }
-    .toggle input:checked + .toggle-slider { background: var(--wheat); }
-    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
-
-    /* Header / Nav */
-    .app-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 20px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .app-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--wheat);
-      text-decoration: none;
-    }
-    .app-logo:hover { text-decoration: none; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-
-    /* Sync pill */
-    .sync-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-    }
-    .sync-pill-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .sync-synced { background: rgba(74,124,89,0.2); color: #6BCB8B; }
-    .sync-synced .sync-pill-dot { background: #6BCB8B; }
-    .sync-syncing { background: rgba(212,168,67,0.2); color: var(--wheat); }
-    .sync-syncing .sync-pill-dot { background: var(--wheat); animation: pulse 1s infinite; }
-    .sync-offline { background: rgba(138,112,96,0.2); color: var(--muted); }
-    .sync-offline .sync-pill-dot { background: var(--muted); }
-    .sync-pending { background: rgba(212,130,58,0.2); color: var(--orange); }
-    .sync-pending .sync-pill-dot { background: var(--orange); }
-    .sync-error { background: rgba(139,58,42,0.2); color: #E07060; cursor: pointer; }
-    .sync-error .sync-pill-dot { background: #E07060; }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    /* Bottom Sheet */
-    .sheet-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 200;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .sheet-backdrop.visible { opacity: 1; }
-
-    .sheet {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-radius: 16px 16px 0 0;
-      padding: 20px 20px calc(20px + var(--safe-bottom));
-      z-index: 201;
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .sheet.visible { transform: translateY(0); }
-    .sheet-handle {
-      width: 40px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 0 auto 20px;
-    }
-    .sheet-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; }
-
-    /* Toast */
-    .toast-container {
-      position: fixed;
-      bottom: calc(24px + var(--safe-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 300;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      pointer-events: none;
-    }
-    .toast {
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      max-width: 320px;
-      text-align: center;
-      animation: toast-in 0.25s ease, toast-out 0.25s ease forwards;
-      pointer-events: all;
-      white-space: nowrap;
-    }
-    .toast-success { background: rgba(74,124,89,0.95); color: #fff; border: 1px solid rgba(74,124,89,0.6); }
-    .toast-error { background: rgba(139,58,42,0.95); color: #fff; border: 1px solid rgba(139,58,42,0.6); }
-    .toast-warning { background: rgba(212,130,58,0.95); color: #fff; border: 1px solid rgba(212,130,58,0.6); }
-    .toast-info { background: rgba(212,168,67,0.15); color: var(--wheat); border: 1px solid rgba(212,168,67,0.4); }
-
-    @keyframes toast-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes toast-out { from{opacity:1} to{opacity:0} }
-
-    /* Spinner */
-    .spinner {
-      display: inline-block;
-      border: 2px solid rgba(255,255,255,0.2);
-      border-top-color: currentColor;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    .spinner-sm { width: 16px; height: 16px; }
-    .spinner-md { width: 24px; height: 24px; }
-    .spinner-lg { width: 40px; height: 40px; }
-    @keyframes spin { to{transform:rotate(360deg)} }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 48px 20px;
-      color: var(--muted);
-    }
-    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
-    .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
-    .empty-state p { font-size: 14px; margin-bottom: 20px; }
-
-    /* Avatar */
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 600;
-      flex-shrink: 0;
-      color: #1A1008;
-    }
-
-    /* Divider */
-    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-
-    /* Banner */
-    .banner {
-      padding: 12px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .banner-trial { background: rgba(212,168,67,0.12); border: 1px solid rgba(212,168,67,0.3); color: var(--wheat); }
-    .banner-error { background: rgba(139,58,42,0.15); border: 1px solid rgba(139,58,42,0.4); color: #E07060; }
-    .banner-info { background: rgba(74,124,89,0.1); border: 1px solid rgba(74,124,89,0.3); color: #6BCB8B; }
-    .banner-link { color: inherit; text-decoration: underline; cursor: pointer; flex-shrink: 0; }
-
-    /* Calendar */
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 3px;
-    }
-    .cal-header-cell {
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-      padding: 6px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .cal-day {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      font-size: 13px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.1s;
-      min-height: 44px;
-    }
-    .cal-day.empty { cursor: default; }
-    .cal-day.future { opacity: 0.35; cursor: not-allowed; }
-    .cal-day.today { border: 2px solid var(--wheat); }
-    .cal-day.full { background: rgba(74,124,89,0.35); color: #6BCB8B; font-weight: 600; }
-    .cal-day.half { background: rgba(212,130,58,0.35); color: var(--orange); font-weight: 600; }
-    .cal-day:not(.empty):not(.future):hover { background: rgba(212,168,67,0.1); }
-    .cal-day.full:hover, .cal-day.half:hover { filter: brightness(1.1); }
-    .cal-day-note {
-      position: absolute;
-      bottom: 2px;
-      right: 3px;
-      width: 5px;
-      height: 5px;
+    .dot {
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--wheat);
+      opacity: 0.7;
+      flex-shrink: 0;
     }
+    .day-row span { font-size: 14px; }
 
-    .cal-nav {
+    /* ── PIN SCREEN ── */
+    .pin-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: 20px;
+    }
+    .pin-icon { font-size: 40px; margin-bottom: 16px; }
+    .pin-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .pin-sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; text-align: center; }
+    .pin-input {
+      width: 180px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      text-align: center;
+      letter-spacing: 8px;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.15s;
+      -webkit-text-security: disc;
+    }
+    .pin-input:focus { border-color: var(--wheat); }
+    .pin-input.shake { animation: shake 0.35s ease; border-color: var(--red); }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60%  { transform: translateX(-8px); }
+      40%,80%  { transform: translateX(8px); }
+    }
+    .pin-btn {
+      width: 180px;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      background: var(--wheat);
+      color: var(--bg);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .pin-btn:hover { background: var(--wheat2); }
+
+    /* ── JANINE DASHBOARD ── */
+    .month-nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .cal-nav-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      cursor: pointer;
-      padding: 8px 14px;
-      font-size: 16px;
-      transition: border-color 0.15s;
-    }
-    .cal-nav-btn:hover { border-color: var(--wheat); }
-    .cal-month-label { font-family: 'Playfair Display', serif; font-size: 20px; }
-
-    .cal-summary {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .cal-summary-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 12px;
-      text-align: center;
-    }
-    .cal-summary-num { font-size: 22px; font-weight: 600; color: var(--wheat); }
-    .cal-summary-label { font-size: 11px; color: var(--muted); }
-
-    /* Day picker targets */
-    .day-type-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .day-type-btn {
-      padding: 16px 8px;
-      border-radius: 8px;
-      border: 2px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: 'DM Mono', monospace;
-    }
-    .day-type-btn:hover { border-color: var(--wheat); }
-    .day-type-btn.selected-full { border-color: var(--green); background: rgba(74,124,89,0.2); }
-    .day-type-btn.selected-half { border-color: var(--orange); background: rgba(212,130,58,0.2); }
-    .day-type-btn.selected-clear { border-color: var(--red); background: rgba(139,58,42,0.2); }
-    .day-type-label { font-size: 13px; font-weight: 600; }
-    .day-type-amount { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-    /* Tab nav */
-    .tab-nav {
-      display: flex;
-      border-bottom: 1px solid var(--border);
       margin-bottom: 20px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    .tab-nav::-webkit-scrollbar { display: none; }
-    .tab-btn {
-      padding: 10px 16px;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--muted);
+    .mnav-btn {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      font-size: 16px;
       cursor: pointer;
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      white-space: nowrap;
+      display: flex; align-items: center; justify-content: center;
       transition: all 0.15s;
     }
-    .tab-btn.active { color: var(--wheat); border-bottom-color: var(--wheat); }
-    .tab-btn:hover:not(.active) { color: var(--text); }
-
-    /* Onboarding progress */
-    .progress-steps {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 32px;
+    .mnav-btn:hover { border-color: var(--wheat); color: var(--wheat); }
+    .month-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
     }
-    .progress-step {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border);
-      transition: background 0.3s;
-    }
-    .progress-step.done { background: var(--wheat); }
-    .progress-step.active { background: rgba(212,168,67,0.5); }
 
-    .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-
-    /* Landing */
-    .hero {
+    .earn-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
       text-align: center;
-      padding: 80px 20px 60px;
+      position: relative;
+      overflow: hidden;
     }
-    .hero h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.2; margin-bottom: 16px; }
-    .hero p { font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto 32px; }
-    .hero-cta { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 60px;
+    .earn-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,168,67,0.12) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
-    .feature-icon { font-size: 28px; margin-bottom: 10px; }
-    .feature-title { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 6px; }
-    .feature-desc { font-size: 13px; color: var(--muted); }
-
-    .pricing-section { text-align: center; padding: 40px 0; }
-    .pricing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px; font-size: 14px; }
-    .pricing-card {
-      background: var(--surface);
-      border: 2px solid var(--wheat);
-      border-radius: 12px;
-      padding: 32px;
-      max-width: 360px;
-      margin: 0 auto;
-    }
-    .pricing-plan { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-    .pricing-price { font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 4px; }
-    .pricing-features { list-style: none; text-align: left; margin: 20px 0; }
-    .pricing-features li { padding: 6px 0; font-size: 14px; }
-    .pricing-features li::before { content: '✓ '; color: var(--green); }
-
-    /* Worker card */
-    .worker-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .worker-card-info { flex: 1; min-width: 0; }
-    .worker-name { font-weight: 600; font-size: 15px; }
-    .worker-stats { font-size: 13px; color: var(--muted); margin-top: 3px; }
-    .worker-amount { font-size: 15px; color: var(--wheat); margin-top: 2px; }
-
-    /* Modal */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      max-width: 480px;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 12px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-    /* Table */
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th {
-      text-align: left;
-      padding: 8px 12px;
+    .earn-lbl {
       font-size: 11px;
-      color: var(--muted);
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      margin-bottom: 10px;
     }
-    .data-table td {
-      padding: 10px 12px;
-      font-size: 13px;
-      border-bottom: 1px solid rgba(74,48,32,0.5);
-      vertical-align: middle;
+    .earn-amt {
+      font-family: 'Playfair Display', serif;
+      font-size: 52px;
+      color: var(--wheat);
+      line-height: 1;
+      margin-bottom: 8px;
     }
-    .data-table tr:last-child td { border-bottom: none; }
+    .earn-detail { font-size: 13px; color: var(--muted); }
 
-    /* Paywall */
-    .paywall-center {
-      min-height: 80vh;
+    .dl-btn {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: 40px 20px;
+      gap: 8px;
+      width: 100%;
+      padding: 15px;
+      border-radius: 13px;
+      border: none;
+      background: var(--wheat);
+      color: var(--bg);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 24px;
+      transition: background 0.15s, transform 0.1s;
     }
-    .paywall-icon { font-size: 60px; margin-bottom: 24px; }
+    .dl-btn:hover { background: var(--wheat2); transform: translateY(-1px); }
+    .dl-btn:active { transform: translateY(0); }
 
-    /* Loading screen */
-    .loading-screen {
+    /* ── SHARED ── */
+    .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 14px; }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2px solid var(--border);
+      border-top-color: var(--wheat);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
       position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-      z-index: 500;
+      bottom: env(safe-area-inset-bottom, 24px);
+      bottom: calc(env(safe-area-inset-bottom) + 24px);
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--card2);
+      color: var(--fg);
+      padding: 12px 22px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
     }
-    .loading-logo { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--wheat); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Responsive */
-    @media (max-width: 480px) {
-      .page, .page-wide { padding: 16px; }
-      .hero { padding: 48px 16px 40px; }
-      .cal-day { font-size: 12px; min-height: 38px; }
-      .feature-grid { grid-template-columns: 1fr; }
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff; color: #111; font-family: Georgia, serif; }
+      .hdr, .tabs, .month-nav, .dl-btn, .undo-btn { display: none !important; }
+      .screen { padding: 0; max-width: 100%; }
+      .earn-card {
+        background: #f7f7f7;
+        border-color: #ddd;
+        break-inside: avoid;
+      }
+      .earn-card::before { display: none; }
+      .earn-amt { color: #333; font-size: 40px; }
+      .earn-lbl, .earn-detail { color: #666; }
+      .day-row { background: #f7f7f7; border-color: #ddd; break-inside: avoid; }
+      .day-row span { color: #111; }
+      .dot { background: #555; }
+      .sec-label { color: #666; }
+      .print-hdr { display: block !important; }
     }
-
-    /* Hidden helper */
-    .hidden { display: none !important; }
-    .mt-8 { margin-top: 8px; }
-    .mt-12 { margin-top: 12px; }
-    .mt-16 { margin-top: 16px; }
-    .mt-24 { margin-top: 24px; }
-    .mb-4 { margin-bottom: 4px; }
-    .mb-8 { margin-bottom: 8px; }
-    .mb-16 { margin-bottom: 16px; }
-    .flex { display: flex; }
-    .flex-center { display: flex; align-items: center; justify-content: center; }
-    .gap-8 { gap: 8px; }
-    .gap-12 { gap: 12px; }
-    .text-muted { color: var(--muted); }
-    .text-wheat { color: var(--wheat); }
-    .text-green { color: #6BCB8B; }
-    .text-red { color: #E07060; }
-    .text-sm { font-size: 13px; }
-    .text-xs { font-size: 11px; }
-    .text-center { text-align: center; }
-    .fw-600 { font-weight: 600; }
-    .cursor-pointer { cursor: pointer; }
+    .print-hdr {
+      display: none;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #333;
+    }
+    .print-hdr h1 { font-size: 26px; margin-bottom: 4px; }
+    .print-hdr p  { font-size: 14px; color: #555; }
   </style>
 </head>
 <body>
 
-<div id="loading-screen" class="loading-screen">
-  <div class="loading-logo">PaddockPay</div>
-  <div class="spinner spinner-md" style="color:var(--wheat)"></div>
-</div>
+<header class="hdr">
+  <span class="logo">PaddockPay</span>
+  <div class="tabs">
+    <button class="tab" id="tab-josh"   onclick="gotoView('josh')">Josh</button>
+    <button class="tab" id="tab-janine" onclick="gotoView('janine')">Janine</button>
+  </div>
+</header>
 
-<div id="app" style="display:none">
-  <div id="app-header" class="app-header hidden">
-    <a href="#/" class="app-logo">PaddockPay</a>
-    <div class="header-right">
-      <div id="sync-pill" class="sync-pill sync-synced hidden">
-        <div class="sync-pill-dot"></div>
-        <span id="sync-label">Synced</span>
-      </div>
-      <button id="header-logout" class="btn btn-ghost btn-sm hidden" onclick="authSignOut()">Log out</button>
-    </div>
+<!-- ══ JOSH SCREEN ══ -->
+<div class="screen" id="screen-josh">
+  <div class="date-block">
+    <div class="date-weekday" id="j-weekday"></div>
+    <div class="date-full"    id="j-date"></div>
   </div>
 
-  <div id="view-container"></div>
+  <button class="big-btn" id="log-btn" onclick="logToday()">
+    <span id="log-icon">☀️</span>
+    <span id="log-txt">Log today's work</span>
+  </button>
+  <button class="undo-btn" id="undo-btn" style="display:none" onclick="undoToday()">
+    ↩ Undo today's entry
+  </button>
 
-  <div class="toast-container" id="toast-container"></div>
+  <div class="sec-label">Recent days worked</div>
+  <div class="day-list" id="josh-list"><div class="spinner"></div></div>
 </div>
 
+<!-- ══ JANINE — PIN GATE ══ -->
+<div class="screen" id="screen-pin">
+  <div class="pin-wrap">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title">Janine's Dashboard</div>
+    <p class="pin-sub">Enter your PIN to view statements<br>and earnings history.</p>
+    <input type="password" inputmode="numeric" maxlength="6"
+           class="pin-input" id="pin-input"
+           placeholder="••••"
+           onkeydown="if(event.key==='Enter')checkPin()">
+    <button class="pin-btn" onclick="checkPin()">Unlock</button>
+  </div>
+</div>
+
+<!-- ══ JANINE — DASHBOARD ══ -->
+<div class="screen" id="screen-janine">
+
+  <!-- Hidden print header -->
+  <div class="print-hdr" id="print-hdr">
+    <h1>PaddockPay — Work Statement</h1>
+    <p id="print-sub"></p>
+  </div>
+
+  <div class="month-nav">
+    <button class="mnav-btn" onclick="changeMonth(-1)">&#8592;</button>
+    <div class="month-label" id="month-lbl"></div>
+    <button class="mnav-btn" onclick="changeMonth(1)">&#8594;</button>
+  </div>
+
+  <div class="earn-card">
+    <div class="earn-lbl" id="earn-lbl">Total earned</div>
+    <div class="earn-amt" id="earn-amt">$0</div>
+    <div class="earn-detail" id="earn-detail">0 days &times; $350/day</div>
+  </div>
+
+  <button class="dl-btn" onclick="printStatement()">
+    &#8595;&nbsp; Download / Print Statement
+  </button>
+
+  <div class="sec-label">Days worked</div>
+  <div class="day-list" id="janine-list"><div class="spinner"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase.js"></script>
 <script>
-// ===== SUPABASE CLIENT =====
-const SUPABASE_URL = 'https://qfuffybirntwooanvtte.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmdWZmeWJpcm50d29vYW52dHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MTA1ODYsImV4cCI6MjA5MTE4NjU4Nn0.rq16AX7yjAELec3zgqekOP-LEow2luUV_-oTC5OTNks';
+// ── CONFIG ────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://qfuffybirntwooanvtte.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmdWZmeWJpcm50d29vYW52dHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5NTEwMDYsImV4cCI6MjA1OTUyNzAwNn0.UeNVJNqjGLDmAR0rnVjBFcmRj8r8rH_eicXz1IIQQ2g';
+const DAY_RATE      = 350;
+const JANINE_PIN    = '2606';   // ← change this to whatever PIN Janine wants
+
+// ── INIT ──────────────────────────────────────────────────
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ===== APP STATE =====
-let currentUser = null;
-let currentProfile = null;
-let syncStatus = 'synced'; // synced | syncing | offline | pending | error
-let pendingCount = 0;
+let curMonth = new Date();
+curMonth.setDate(1);
 
-// ===== INDEXEDDB OFFLINE QUEUE =====
-const DB_NAME = 'paddockpay_offline';
-const STORE_NAME = 'sync_queue';
-let idb = null;
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function pad(n) { return String(n).padStart(2,'0'); }
 
-function openIDB() {
-  return new Promise((resolve, reject) => {
-    if (idb) { resolve(idb); return; }
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onerror = () => reject(req.error);
-    req.onsuccess = () => { idb = req.result; resolve(idb); };
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-  });
+function fmtDate(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString('en-AU',
+    {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+}
+function fmtMonth(dt) {
+  return dt.toLocaleDateString('en-AU', {month:'long', year:'numeric'});
+}
+function fmtAUD(n) {
+  return '$' + n.toLocaleString('en-AU');
 }
 
-async function queueOfflineAction(action, table, payload) {
-  const db = await openIDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const item = { action, table, payload, created_at: new Date().toISOString(), retry_count: 0 };
-    const req = store.add(item);
-    req.onsuccess = () => { resolve(req.result); updatePendingCount(); };
-    req.onerror = () => reject(req.error);
-  });
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-async function getQueueItems() {
-  const db = await openIDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
+// ── ROUTING ───────────────────────────────────────────────
+function gotoView(view) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('tab-' + view).classList.add('on');
 
-async function removeQueueItem(id) {
-  const db = await openIDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function updateQueueItem(id, updates) {
-  const db = await openIDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const getReq = store.get(id);
-    getReq.onsuccess = () => {
-      const item = { ...getReq.result, ...updates };
-      const putReq = store.put(item);
-      putReq.onsuccess = () => resolve();
-      putReq.onerror = () => reject(putReq.error);
-    };
-  });
-}
-
-async function updatePendingCount() {
-  try {
-    const items = await getQueueItems();
-    pendingCount = items.length;
-    updateSyncUI();
-  } catch {}
-}
-
-async function flushQueue() {
-  if (!navigator.onLine) return;
-  const items = await getQueueItems();
-  if (items.length === 0) { setSyncStatus('synced'); return; }
-  setSyncStatus('syncing');
-  let hasError = false;
-  for (const item of items) {
-    try {
-      if (item.action === 'upsert') {
-        const { error } = await db.from(item.table).upsert(item.payload);
-        if (error) throw error;
-      } else if (item.action === 'delete') {
-        const { error } = await db.from(item.table).delete().match(item.payload);
-        if (error) throw error;
-      }
-      await removeQueueItem(item.id);
-    } catch (err) {
-      if (item.retry_count < 10) {
-        await updateQueueItem(item.id, { retry_count: item.retry_count + 1 });
-      }
-      hasError = true;
-    }
-  }
-  await updatePendingCount();
-  if (hasError) { setSyncStatus('error'); }
-  else { setSyncStatus('synced'); router(); } // refresh UI
-}
-
-function setSyncStatus(status) {
-  syncStatus = status;
-  updateSyncUI();
-}
-
-function updateSyncUI() {
-  const pill = document.getElementById('sync-pill');
-  const label = document.getElementById('sync-label');
-  if (!pill || !label) return;
-  if (!currentUser) { pill.classList.add('hidden'); return; }
-  pill.classList.remove('hidden');
-  pill.className = 'sync-pill';
-  if (!navigator.onLine) {
-    if (pendingCount > 0) {
-      pill.classList.add('sync-pending');
-      label.textContent = `${pendingCount} pending`;
+  if (view === 'janine') {
+    // Check session PIN
+    if (sessionStorage.getItem('pp_auth') === '1') {
+      document.getElementById('screen-janine').classList.add('on');
+      loadJanine();
     } else {
-      pill.classList.add('sync-offline');
-      label.textContent = 'Offline';
+      document.getElementById('screen-pin').classList.add('on');
+      setTimeout(() => document.getElementById('pin-input').focus(), 100);
     }
-  } else if (status === 'syncing') {
-    pill.classList.add('sync-syncing');
-    label.textContent = 'Syncing...';
-  } else if (syncStatus === 'error') {
-    pill.classList.add('sync-error');
-    label.textContent = 'Sync error';
-    pill.onclick = () => flushQueue();
   } else {
-    pill.classList.add('sync-synced');
-    label.textContent = 'Synced ✓';
-    pill.onclick = null;
+    document.getElementById('screen-josh').classList.add('on');
+    loadJosh();
+  }
+  history.replaceState(null,'','#/' + view);
+}
+
+// ── PIN ───────────────────────────────────────────────────
+function checkPin() {
+  const val = document.getElementById('pin-input').value;
+  if (val === JANINE_PIN) {
+    sessionStorage.setItem('pp_auth', '1');
+    document.getElementById('pin-input').value = '';
+    gotoView('janine');
+  } else {
+    const inp = document.getElementById('pin-input');
+    inp.classList.add('shake');
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('shake'), 400);
+    showToast('Incorrect PIN — try again');
   }
 }
 
-window.addEventListener('online', () => { updateSyncUI(); flushQueue(); });
-window.addEventListener('offline', updateSyncUI);
-
-// ===== TOAST =====
-function showToast(message, type = 'success', duration = 3500) {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.animationName = 'toast-out';
-    setTimeout(() => toast.remove(), 250);
-  }, duration);
-}
-
-// ===== AUDIT LOG =====
-async function writeAudit(action, tableName, recordId, oldValue, newValue, role) {
-  if (!currentUser) return;
-  try {
-    await db.from('audit_log').insert({
-      user_id: currentUser.id,
-      action,
-      table_name: tableName,
-      record_id: recordId ? String(recordId) : null,
-      old_value: oldValue || null,
-      new_value: newValue || null,
-      performed_by_role: role || (currentProfile?.role === 'admin' ? 'admin' : 'worker'),
-    });
-  } catch {}
-}
-
-// ===== AUTH =====
-async function authSignOut() {
-  await db.auth.signOut();
-  currentUser = null;
-  currentProfile = null;
-  navigate('/login');
-}
-
-async function loadProfile(userId) {
-  const { data, error } = await db.from('profiles').select('*').eq('id', userId).single();
-  if (error) return null;
-  return data;
-}
-
-// ===== UTILITIES =====
-function sanitize(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function formatAUD(amount) {
-  return Number(amount).toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function dayKey(date) {
-  const d = date instanceof Date ? date : new Date(date);
-  return d.toISOString().split('T')[0];
-}
-
-function getAEST() {
-  // Returns current date in AEST (UTC+10)
+// ── JOSH ──────────────────────────────────────────────────
+async function loadJosh() {
   const now = new Date();
-  const aest = new Date(now.toLocaleString('en-US', { timeZone: 'Australia/Brisbane' }));
-  return aest;
-}
+  document.getElementById('j-weekday').textContent =
+    now.toLocaleDateString('en-AU', {weekday:'long'});
+  document.getElementById('j-date').textContent =
+    now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
 
-function monthLabel(month, year) {
-  return new Date(year, month - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
-}
+  const todayStr = todayISO();
 
-function greeting() {
-  const h = getAEST().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
-}
+  // Check if logged today
+  const { data: todayRow } = await db
+    .from('work_logs').select('date').eq('date', todayStr).maybeSingle();
 
-function daysInMonth(year, month) {
-  return new Date(year, month, 0).getDate();
-}
-
-function firstDayOfMonth(year, month) {
-  return new Date(year, month - 1, 1).getDay(); // 0=Sun
-}
-
-function avatarColor(name) {
-  const colors = ['#D4A843','#4A7C59','#D4823A','#6B8ED4','#C46B8A','#7B6BC4'];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}
-
-function avatarInitials(name) {
-  if (!name) return '?';
-  return name.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
-}
-
-function trialDaysLeft(profile) {
-  if (!profile) return 0;
-  const end = new Date(profile.trial_ends_at);
-  const now = new Date();
-  return Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
-}
-
-function isExpired(profile) {
-  if (!profile) return false;
-  if (profile.subscription_status === 'active') return false;
-  if (profile.subscription_status === 'trial') return trialDaysLeft(profile) === 0;
-  return profile.subscription_status === 'expired';
-}
-
-function pwStrength(pw) {
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (pw.length >= 12) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  if (score <= 1) return { label: 'Weak', color: 'var(--red)', pct: 20 };
-  if (score <= 2) return { label: 'Fair', color: 'var(--orange)', pct: 40 };
-  if (score <= 3) return { label: 'Good', color: 'var(--wheat)', pct: 65 };
-  return { label: 'Strong', color: 'var(--green)', pct: 100 };
-}
-
-// ===== ROUTER =====
-function navigate(route) {
-  window.location.hash = '#' + route;
-}
-
-async function router() {
-  const hash = window.location.hash || '#/';
-  const [rawRoute, rawQuery] = hash.slice(1).split('?');
-  const route = rawRoute || '/';
-  const params = Object.fromEntries(new URLSearchParams(rawQuery || ''));
-
-  const header = document.getElementById('app-header');
-  const logoutBtn = document.getElementById('header-logout');
-  const container = document.getElementById('view-container');
-
-  // Use already-resolved currentUser (set in init) — no network call in router
-  if (currentUser && !currentProfile) {
-    try { currentProfile = await loadProfile(currentUser.id); } catch(e) {}
-  }
-
-  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/accept-invite'];
-  const isPublic = publicRoutes.includes(route);
-
-  // Auth guard
-  if (!isPublic && !currentUser) {
-    navigate('/login');
-    return;
-  }
-
-  // Paywall guard
-  if (currentUser && currentProfile && isExpired(currentProfile) && route !== '/paywall' && route !== '/subscription') {
-    navigate('/paywall');
-    return;
-  }
-
-  // Onboarding guard
-  if (currentUser && currentProfile && !currentProfile.onboarding_completed &&
-      (currentProfile.role === 'admin' || currentProfile.role === 'both') &&
-      route !== '/onboarding' && !isPublic) {
-    navigate('/onboarding');
-    return;
-  }
-
-  // Worker admin guard
-  const adminRoutes = ['/workers', '/statements', '/xero'];
-  if (currentUser && currentProfile && currentProfile.role === 'worker' && adminRoutes.includes(route)) {
-    navigate('/dashboard');
-    return;
-  }
-
-  // Header visibility
-  const hideHeader = ['/', '/login', '/signup', '/forgot-password', '/accept-invite', '/paywall'].includes(route);
-  if (hideHeader) {
-    header.classList.add('hidden');
-  } else {
-    header.classList.remove('hidden');
-    logoutBtn.classList.remove('hidden');
-    updateSyncUI();
-  }
-
-  // Render route
-  switch (route) {
-    case '/': renderLanding(container); break;
-    case '/signup': renderSignup(container); break;
-    case '/login': renderLogin(container); break;
-    case '/forgot-password': renderForgotPassword(container); break;
-    case '/accept-invite': renderAcceptInvite(container, params); break;
-    case '/onboarding': renderOnboarding(container); break;
-    case '/dashboard': renderDashboard(container); break;
-    case '/calendar': renderCalendar(container, null); break;
-    default:
-      if (route.startsWith('/calendar/')) {
-        const workerId = route.split('/calendar/')[1];
-        renderCalendar(container, workerId);
-      } else {
-        switch (route) {
-          case '/workers': renderWorkers(container); break;
-          case '/statements': renderStatements(container); break;
-          case '/xero': renderXero(container); break;
-          case '/settings': renderSettings(container, params); break;
-          case '/subscription': renderSubscription(container); break;
-          case '/paywall': renderPaywall(container); break;
-          default: container.innerHTML = `<div class="page"><h2>404 — Page not found</h2><a href="#/" class="btn btn-ghost mt-16">Go home</a></div>`;
-        }
-      }
-  }
-}
-
-window.addEventListener('hashchange', router);
-
-// ===== LANDING =====
-function renderLanding(el) {
-  el.innerHTML = `
-    <div style="max-width:900px;margin:0 auto;padding:0 20px 60px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0">
-        <div class="app-logo" style="font-size:22px">PaddockPay</div>
-        <div style="display:flex;gap:10px">
-          <a href="#/login" class="btn btn-ghost btn-sm">Log in</a>
-          <a href="#/signup" class="btn btn-primary btn-sm">Sign up</a>
-        </div>
-      </div>
-
-      <div class="hero">
-        <h1>Track days.<br>Send invoices.<br>Get paid.</h1>
-        <p>Labour tracking and Xero invoicing built for Australian agricultural contractors.</p>
-        <div class="hero-cta">
-          <a href="#/signup" class="btn btn-primary" style="font-size:15px;padding:14px 28px">Start free 7-day trial — no credit card required</a>
-          <a href="#/login" class="btn btn-ghost">Log in</a>
-        </div>
-      </div>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">📅</div>
-          <div class="feature-title">Day Tracking</div>
-          <p class="feature-desc">Log full and half days with notes. Works offline in the paddock.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔗</div>
-          <div class="feature-title">Xero Integration</div>
-          <p class="feature-desc">Invoices created automatically in Xero at month end.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📄</div>
-          <div class="feature-title">Automatic Statements</div>
-          <p class="feature-desc">Monthly statements sent by email. No manual work required.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">👥</div>
-          <div class="feature-title">Multi-Worker</div>
-          <p class="feature-desc">Manage multiple workers, each with their own day rate.</p>
-        </div>
-      </div>
-
-      <div class="pricing-section">
-        <h2 style="font-size:28px;margin-bottom:8px">Simple pricing</h2>
-        <p style="color:var(--muted);margin-bottom:24px">One plan. Everything included.</p>
-        <div class="pricing-card">
-          <div class="pricing-plan">Monthly Plan</div>
-          <div class="pricing-price"><span class="badge badge-trial" style="font-size:18px">Coming Soon</span></div>
-          <ul class="pricing-features">
-            <li>Unlimited day tracking</li>
-            <li>Xero invoice sync</li>
-            <li>Automatic monthly statements</li>
-            <li>Multi-worker support</li>
-            <li>Audit log</li>
-            <li>iOS + Android PWA</li>
-          </ul>
-          <a href="#/signup" class="btn btn-primary btn-full">Start free 7-day trial</a>
-          <p style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center">No credit card required</p>
-        </div>
-      </div>
-
-      <div style="text-align:center;padding:40px 0;border-top:1px solid var(--border)">
-        <p style="color:var(--muted);font-size:13px">Questions? <a href="mailto:support@paddockpay.com.au">support@paddockpay.com.au</a></p>
-      </div>
-    </div>
-  `;
-}
-
-// ===== SIGNUP =====
-function renderSignup(el) {
-  el.innerHTML = `
-    <div class="page">
-      <div style="text-align:center;margin-bottom:28px">
-        <a href="#/" class="app-logo" style="font-size:26px">PaddockPay</a>
-        <h2 style="margin-top:16px;font-size:24px">Create your account</h2>
-        <p class="text-muted text-sm" style="margin-top:6px">7-day free trial — no credit card required</p>
-      </div>
-
-      <form id="signup-form">
-        <div class="form-group">
-          <label class="form-label">Full name</label>
-          <input type="text" id="su-name" class="form-input" placeholder="Sarah Mitchell" autocomplete="name" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <input type="email" id="su-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="input-wrap">
-            <input type="password" id="su-password" class="form-input" placeholder="Min 8 characters" autocomplete="new-password" required minlength="8">
-            <button type="button" class="input-toggle" onclick="togglePw('su-password',this)">👁</button>
-          </div>
-          <div class="pw-strength" id="pw-strength-wrap" style="display:none">
-            <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-bar" style="width:0"></div></div>
-            <div class="pw-strength-label" id="pw-label"></div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">I am a...</label>
-          <div class="radio-group">
-            <label class="radio-option selected" id="role-admin-opt">
-              <input type="radio" name="role" value="admin" id="role-admin" checked>
-              <div>
-                <div class="radio-label">Contractor or business owner (Admin)</div>
-                <div class="radio-desc">Manage workers, view reports, connect Xero</div>
-              </div>
-            </label>
-            <label class="radio-option" id="role-worker-opt">
-              <input type="radio" name="role" value="worker" id="role-worker">
-              <div>
-                <div class="radio-label">Worker</div>
-                <div class="radio-desc">Log your own days, view your statements</div>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-group" id="biz-name-group">
-          <label class="form-label">Business name <span class="text-muted">(optional)</span></label>
-          <input type="text" id="su-biz" class="form-input" placeholder="Mitchell Ag Services">
-        </div>
-
-        <div class="form-group">
-          <label class="checkbox-wrap">
-            <input type="checkbox" id="su-terms" required>
-            <span class="checkbox-label">I agree to the <a href="mailto:support@paddockpay.com.au">Terms of Service</a> and <a href="mailto:support@paddockpay.com.au">Privacy Policy</a></span>
-          </label>
-        </div>
-
-        <div id="signup-error" class="form-error hidden"></div>
-        <button type="submit" class="btn btn-primary btn-full" id="signup-btn">Start free trial</button>
-      </form>
-
-      <p class="text-center text-sm text-muted mt-16">Already have an account? <a href="#/login">Log in</a></p>
-    </div>
-  `;
-
-  // Password strength
-  const pwInput = document.getElementById('su-password');
-  pwInput.addEventListener('input', () => {
-    const pw = pwInput.value;
-    const wrap = document.getElementById('pw-strength-wrap');
-    if (!pw) { wrap.style.display = 'none'; return; }
-    wrap.style.display = 'block';
-    const s = pwStrength(pw);
-    document.getElementById('pw-bar').style.width = s.pct + '%';
-    document.getElementById('pw-bar').style.background = s.color;
-    document.getElementById('pw-label').textContent = s.label;
-    document.getElementById('pw-label').style.color = s.color;
-  });
-
-  // Role toggle
-  document.querySelectorAll('input[name=role]').forEach(r => {
-    r.addEventListener('change', () => {
-      document.getElementById('role-admin-opt').classList.toggle('selected', r.value !== 'worker' || document.getElementById('role-admin').checked);
-      document.getElementById('role-worker-opt').classList.toggle('selected', r.value === 'worker');
-      document.getElementById('role-admin-opt').classList.toggle('selected', document.getElementById('role-admin').checked);
-      document.getElementById('biz-name-group').classList.toggle('hidden', r.value === 'worker');
-    });
-  });
-
-  document.getElementById('signup-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn = document.getElementById('signup-btn');
-    const errEl = document.getElementById('signup-error');
-    errEl.classList.add('hidden');
+  const btn  = document.getElementById('log-btn');
+  const undo = document.getElementById('undo-btn');
+  if (todayRow) {
+    btn.classList.add('done');
+    document.getElementById('log-icon').textContent = '✓';
+    document.getElementById('log-txt').textContent  = 'Logged for today';
     btn.disabled = true;
-    btn.innerHTML = '<div class="spinner spinner-sm"></div> Creating account...';
-
-    const name = sanitize(document.getElementById('su-name').value.trim());
-    const email = document.getElementById('su-email').value.trim();
-    const password = document.getElementById('su-password').value;
-    const role = document.querySelector('input[name=role]:checked').value;
-    const biz = sanitize(document.getElementById('su-biz').value.trim());
-
-    if (password.length < 8) {
-      errEl.textContent = 'Password must be at least 8 characters.';
-      errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Start free trial';
-      return;
-    }
-
-    const { data, error } = await db.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: name, role, business_name: biz || null } }
-    });
-
-    if (error) {
-      errEl.textContent = error.message;
-      errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Start free trial';
-      return;
-    }
-
-    // Create subscription row for admin
-    if (role === 'admin' && data.user) {
-      await db.from('subscriptions').insert({ admin_id: data.user.id });
-      if (biz) await db.from('profiles').update({ business_name: biz }).eq('id', data.user.id);
-    }
-
-    currentUser = data.user;
-    currentProfile = await loadProfile(data.user.id);
-
-    // Check for post-signup redirect (e.g. accept-invite flow)
-    const signupParams = Object.fromEntries(new URLSearchParams((window.location.hash.split('?')[1] || '')));
-    if (signupParams.return === 'accept-invite' && signupParams.token) {
-      navigate('/accept-invite?token=' + signupParams.token);
-      return;
-    }
-
-    if (role === 'admin') navigate('/onboarding');
-    else navigate('/dashboard');
-  });
-}
-
-function togglePw(id, btn) {
-  const inp = document.getElementById(id);
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-  else { inp.type = 'password'; btn.textContent = '👁'; }
-}
-
-// ===== LOGIN =====
-function renderLogin(el) {
-  el.innerHTML = `
-    <div class="page">
-      <div style="text-align:center;margin-bottom:28px">
-        <a href="#/" class="app-logo" style="font-size:26px">PaddockPay</a>
-        <h2 style="margin-top:16px;font-size:24px">Welcome back</h2>
-      </div>
-
-      <form id="login-form">
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <input type="email" id="li-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="input-wrap">
-            <input type="password" id="li-password" class="form-input" placeholder="Your password" autocomplete="current-password" required>
-            <button type="button" class="input-toggle" onclick="togglePw('li-password',this)">👁</button>
-          </div>
-        </div>
-        <div style="text-align:right;margin-top:-8px;margin-bottom:16px">
-          <a href="#/forgot-password" class="text-sm text-muted">Forgot password?</a>
-        </div>
-        <div id="login-error" class="form-error hidden"></div>
-        <button type="submit" class="btn btn-primary btn-full" id="login-btn">Log in</button>
-      </form>
-
-      <p class="text-center text-sm text-muted mt-16">Don't have an account? <a href="#/signup">Start free trial</a></p>
-    </div>
-  `;
-
-  document.getElementById('login-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn = document.getElementById('login-btn');
-    const errEl = document.getElementById('login-error');
-    errEl.classList.add('hidden');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner spinner-sm"></div> Logging in...';
-
-    const email = document.getElementById('li-email').value.trim();
-    const password = document.getElementById('li-password').value;
-
-    const { data, error } = await db.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      errEl.textContent = 'Incorrect email or password.';
-      errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Log in';
-      return;
-    }
-
-    currentUser = data.user;
-    currentProfile = await loadProfile(data.user.id);
-
-    if (isExpired(currentProfile)) { navigate('/paywall'); return; }
-
-    // Check for post-login redirect (e.g. accept-invite flow)
-    const loginParams = Object.fromEntries(new URLSearchParams((window.location.hash.split('?')[1] || '')));
-    if (loginParams.return === 'accept-invite' && loginParams.token) {
-      navigate('/accept-invite?token=' + loginParams.token);
-      return;
-    }
-
-    if (!currentProfile.onboarding_completed && (currentProfile.role === 'admin' || currentProfile.role === 'both')) {
-      navigate('/onboarding');
-    } else {
-      navigate('/dashboard');
-    }
-  });
-}
-
-// ===== FORGOT PASSWORD =====
-function renderForgotPassword(el) {
-  el.innerHTML = `
-    <div class="page">
-      <div style="text-align:center;margin-bottom:28px">
-        <a href="#/" class="app-logo" style="font-size:26px">PaddockPay</a>
-        <h2 style="margin-top:16px;font-size:24px">Reset password</h2>
-        <p class="text-muted text-sm" style="margin-top:6px">Enter your email to receive a reset link.</p>
-      </div>
-
-      <form id="forgot-form">
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <input type="email" id="fp-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
-        </div>
-        <div id="forgot-success" class="banner banner-info hidden" style="margin-bottom:16px">
-          Check your email for a reset link.
-        </div>
-        <button type="submit" class="btn btn-primary btn-full" id="forgot-btn">Send reset link</button>
-      </form>
-
-      <p class="text-center text-sm text-muted mt-16"><a href="#/login">Back to log in</a></p>
-    </div>
-  `;
-
-  document.getElementById('forgot-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn = document.getElementById('forgot-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner spinner-sm"></div> Sending...';
-    const email = document.getElementById('fp-email').value.trim();
-    // Always send regardless of whether email exists (prevents enumeration)
-    await db.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://janinepye.github.io/paddockpay/#/settings'
-    });
-    document.getElementById('forgot-success').classList.remove('hidden');
-    btn.textContent = 'Sent';
-  });
-}
-
-// ===== ACCEPT INVITE =====
-async function renderAcceptInvite(el, params) {
-  el.innerHTML = `<div class="page"><div class="flex-center" style="min-height:60vh"><div class="spinner spinner-lg" style="color:var(--wheat)"></div></div></div>`;
-
-  const token = params.token;
-  if (!token) { el.innerHTML = `<div class="page"><div class="empty-state"><h3>Invalid link</h3><p>This invitation link is not valid.</p><a href="#/" class="btn btn-ghost">Go home</a></div></div>`; return; }
-
-  const { data: invite, error } = await db.from('invitations').select('*').eq('token', token).single();
-
-  if (error || !invite) {
-    el.innerHTML = `<div class="page"><div class="empty-state"><h3>Invitation not found</h3><p>This invitation link is invalid or has expired.</p><a href="#/" class="btn btn-ghost">Go home</a></div></div>`;
-    return;
-  }
-
-  if (invite.status === 'accepted') {
-    navigate('/dashboard');
-    return;
-  }
-
-  const expired = new Date(invite.expires_at) < new Date();
-  if (expired || invite.status === 'expired') {
-    // Get admin business name for message
-    const { data: admin } = await db.from('profiles').select('full_name,business_name').eq('id', invite.admin_id).single();
-    el.innerHTML = `
-      <div class="page">
-        <div class="empty-state">
-          <div class="empty-state-icon">⏰</div>
-          <h3>Invitation expired</h3>
-          <p>This invitation has expired. Ask ${sanitize(admin?.business_name || admin?.full_name || 'your employer')} to send a new one.</p>
-          <a href="#/" class="btn btn-ghost">Go home</a>
-        </div>
-      </div>`;
-    return;
-  }
-
-  // Get admin info
-  const { data: admin } = await db.from('profiles').select('full_name,business_name').eq('id', invite.admin_id).single();
-  const bizName = sanitize(admin?.business_name || admin?.full_name || 'your employer');
-
-  if (!currentUser) {
-    el.innerHTML = `
-      <div class="page">
-        <div style="text-align:center;margin-bottom:28px">
-          <div class="app-logo" style="font-size:26px">PaddockPay</div>
-          <h2 style="margin-top:20px;font-size:24px">You've been invited</h2>
-          <p class="text-muted" style="margin-top:8px">Join <strong>${bizName}</strong> at <strong>${formatAUD(invite.day_rate)}/day</strong></p>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:center">
-          <a href="#/login?return=accept-invite&token=${token}" class="btn btn-ghost">Log in</a>
-          <a href="#/signup?return=accept-invite&token=${token}" class="btn btn-primary">Create account</a>
-        </div>
-        <p class="text-center text-sm text-muted mt-16">You'll need a PaddockPay account to accept this invitation.</p>
-      </div>`;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="page">
-      <div style="text-align:center;margin-bottom:28px">
-        <div class="empty-state-icon">🤝</div>
-        <h2 style="font-size:24px">Worker Invitation</h2>
-        <p class="text-muted" style="margin-top:8px">You've been invited to join <strong>${bizName}</strong> at <strong>${formatAUD(invite.day_rate)}/day</strong></p>
-      </div>
-      <button class="btn btn-primary btn-full" id="accept-btn" onclick="acceptInvite('${invite.id}','${invite.admin_id}','${invite.token}',${invite.day_rate})">
-        Accept invitation
-      </button>
-      <a href="#/dashboard" class="btn btn-ghost btn-full mt-8">Decline</a>
-    </div>
-  `;
-}
-
-async function acceptInvite(inviteId, adminId, token, dayRate) {
-  const btn = document.getElementById('accept-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner spinner-sm"></div> Accepting...';
-
-  // Update or create employer_worker_link
-  const { error: linkErr } = await db.from('employer_worker_links').upsert({
-    admin_id: adminId,
-    worker_id: currentUser.id,
-    day_rate: dayRate,
-    status: 'active',
-    accepted_at: new Date().toISOString(),
-  }, { onConflict: 'admin_id,worker_id' });
-
-  if (linkErr) { showToast('Failed to accept invitation. Please try again.', 'error'); btn.disabled = false; btn.textContent = 'Accept invitation'; return; }
-
-  // Mark invite as accepted
-  await db.from('invitations').update({ status: 'accepted' }).eq('id', inviteId);
-
-  await writeAudit('worker_linked', 'employer_worker_links', `${adminId}-${currentUser.id}`, null, { admin_id: adminId, worker_id: currentUser.id, day_rate: dayRate }, 'worker');
-
-  showToast('Invitation accepted! Welcome aboard.', 'success');
-  setTimeout(() => navigate('/dashboard'), 1000);
-}
-
-// ===== ONBOARDING =====
-let onboardingStep = 1;
-
-async function renderOnboarding(el) {
-  if (!currentProfile) currentProfile = await loadProfile(currentUser.id);
-  onboardingStep = currentProfile.onboarding_step || 1;
-  renderOnboardingStep(el);
-}
-
-function renderOnboardingStep(el) {
-  const steps = ['Set up your business', 'Invite your first worker', 'Connect Xero'];
-  const stepBars = steps.map((_, i) => {
-    const state = i + 1 < onboardingStep ? 'done' : i + 1 === onboardingStep ? 'active' : '';
-    return `<div class="progress-step ${state}"></div>`;
-  }).join('');
-
-  let body = '';
-  if (onboardingStep === 1) {
-    body = `
-      <h2 style="font-size:28px;margin-bottom:8px">Let's set up your business</h2>
-      <p class="text-muted mb-16">This helps personalise your invoices and statements.</p>
-      <form id="ob1-form">
-        <div class="form-group">
-          <label class="form-label">Business name <span class="text-muted">(optional)</span></label>
-          <input type="text" id="ob-biz" class="form-input" placeholder="Mitchell Ag Services" value="${sanitize(currentProfile?.business_name || '')}">
-        </div>
-        <div class="form-group">
-          <label class="form-label">ABN <span class="text-muted">(optional)</span></label>
-          <input type="text" id="ob-abn" class="form-input" placeholder="12 345 678 901" value="${sanitize(currentProfile?.abn || '')}">
-        </div>
-        <button type="submit" class="btn btn-primary btn-full" id="ob1-btn">Save and continue</button>
-      </form>`;
-  } else if (onboardingStep === 2) {
-    body = `
-      <h2 style="font-size:28px;margin-bottom:8px">Invite your first worker</h2>
-      <p class="text-muted mb-16">Enter their email address and set their daily rate. They'll receive an invitation to join.</p>
-      <form id="ob2-form">
-        <div class="form-group">
-          <label class="form-label">Worker email</label>
-          <input type="email" id="ob-email" class="form-input" placeholder="worker@gmail.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Day rate (AUD)</label>
-          <input type="number" id="ob-rate" class="form-input" placeholder="350.00" min="1" step="0.01" required>
-        </div>
-        <div id="ob2-error" class="form-error hidden mb-8"></div>
-        <button type="submit" class="btn btn-primary btn-full" id="ob2-btn">Send invitation</button>
-      </form>
-      <button class="btn btn-ghost btn-full mt-8" onclick="skipOnboarding()">I'll do this later →</button>`;
-  } else if (onboardingStep === 3) {
-    body = `
-      <h2 style="font-size:28px;margin-bottom:8px">Connect your Xero account</h2>
-      <p class="text-muted mb-16">PaddockPay will automatically create invoices in Xero at the end of each month.</p>
-      <div class="card mb-16">
-        <p class="text-sm">You'll need a <strong>Xero Developer account</strong> and a registered app with this redirect URI:</p>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:8px 12px;margin-top:10px;font-size:12px;word-break:break-all">
-          https://qfuffybirntwooanvtte.supabase.co/functions/v1/xero-callback
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="startXeroOAuth()">Connect Xero</button>
-      <button class="btn btn-ghost btn-full mt-8" onclick="completeOnboarding()">I'll connect Xero later →</button>`;
-  }
-
-  el.innerHTML = `
-    <div class="page">
-      <p class="progress-label">Step ${onboardingStep} of 3</p>
-      <div class="progress-steps">${stepBars}</div>
-      ${body}
-    </div>
-  `;
-
-  if (onboardingStep === 1) {
-    document.getElementById('ob1-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const btn = document.getElementById('ob1-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner spinner-sm"></div>';
-      const biz = sanitize(document.getElementById('ob-biz').value.trim());
-      const abn = sanitize(document.getElementById('ob-abn').value.trim());
-      await db.from('profiles').update({ business_name: biz || null, abn: abn || null, onboarding_step: 2 }).eq('id', currentUser.id);
-      currentProfile.business_name = biz;
-      currentProfile.abn = abn;
-      currentProfile.onboarding_step = 2;
-      onboardingStep = 2;
-      renderOnboardingStep(el);
-    });
-  }
-
-  if (onboardingStep === 2) {
-    document.getElementById('ob2-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const btn = document.getElementById('ob2-btn');
-      const errEl = document.getElementById('ob2-error');
-      errEl.classList.add('hidden');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner spinner-sm"></div> Sending...';
-      const email = document.getElementById('ob-email').value.trim();
-      const rate = parseFloat(document.getElementById('ob-rate').value);
-      try {
-        const { error } = await db.functions.invoke('send-invitation', {
-          body: { admin_id: currentUser.id, invited_email: email, day_rate: rate }
-        });
-        if (error) throw error;
-        await db.from('profiles').update({ onboarding_step: 3 }).eq('id', currentUser.id);
-        currentProfile.onboarding_step = 3;
-        onboardingStep = 3;
-        showToast(`Invitation sent to ${email}`, 'success');
-        renderOnboardingStep(el);
-      } catch (err) {
-        errEl.textContent = 'Failed to send invitation. Please try again.';
-        errEl.classList.remove('hidden');
-        btn.disabled = false;
-        btn.textContent = 'Send invitation';
-      }
-    });
-  }
-}
-
-async function skipOnboarding() {
-  const nextStep = onboardingStep + 1;
-  if (nextStep > 3) { await completeOnboarding(); return; }
-  await db.from('profiles').update({ onboarding_step: nextStep }).eq('id', currentUser.id);
-  currentProfile.onboarding_step = nextStep;
-  onboardingStep = nextStep;
-  const el = document.getElementById('view-container');
-  renderOnboardingStep(el);
-}
-
-async function completeOnboarding() {
-  await db.from('profiles').update({ onboarding_completed: true, onboarding_step: 3 }).eq('id', currentUser.id);
-  currentProfile.onboarding_completed = true;
-  showToast("You're all set. Welcome to PaddockPay.", 'success');
-  navigate('/dashboard');
-}
-
-function startXeroOAuth() {
-  if (!currentUser) return;
-  const state = currentUser.id + '.' + Date.now();
-  const clientId = 'YOUR_XERO_CLIENT_ID'; // Set via Xero Developer Portal
-  const redirectUri = 'https://qfuffybirntwooanvtte.supabase.co/functions/v1/xero-callback';
-  const scope = 'openid profile email accounting.transactions accounting.contacts offline_access';
-  const url = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
-  window.location.href = url;
-}
-
-// ===== DASHBOARD =====
-async function renderDashboard(el) {
-  el.innerHTML = `<div class="page"><div class="flex-center" style="min-height:60vh"><div class="spinner spinner-lg" style="color:var(--wheat)"></div></div></div>`;
-  if (!currentProfile) currentProfile = await loadProfile(currentUser.id);
-
-  const isAdmin = currentProfile.role === 'admin' || currentProfile.role === 'both';
-
-  if (isAdmin) {
-    await renderAdminDashboard(el);
+    undo.style.display = 'block';
   } else {
-    await renderWorkerDashboard(el);
-  }
-}
-
-async function renderAdminDashboard(el) {
-  const profile = currentProfile;
-  const now = getAEST();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-
-  // Get workers
-  const { data: links } = await db.from('employer_worker_links')
-    .select('*, profiles:worker_id(id,full_name,email)')
-    .eq('admin_id', currentUser.id)
-    .eq('status', 'active');
-
-  const workers = links || [];
-
-  // Get this month's labour days for all workers
-  const workerIds = workers.map(w => w.worker_id);
-  let workerDays = {};
-  if (workerIds.length > 0) {
-    const prefix = `${year}-${String(month).padStart(2,'0')}`;
-    const { data: days } = await db.from('labour_days')
-      .select('*')
-      .eq('admin_id', currentUser.id)
-      .like('day_key', `${prefix}%`);
-    (days || []).forEach(d => {
-      if (!workerDays[d.worker_id]) workerDays[d.worker_id] = [];
-      workerDays[d.worker_id].push(d);
-    });
-  }
-
-  const trialLeft = trialDaysLeft(profile);
-  const expired = isExpired(profile);
-
-  let bannerHtml = '';
-  if (expired) {
-    bannerHtml = `<div class="banner banner-error">Your free trial has ended. <a class="banner-link" href="#/paywall">Go to subscription →</a></div>`;
-  } else if (profile.subscription_status === 'trial') {
-    bannerHtml = `<div class="banner banner-trial">${trialLeft} day${trialLeft !== 1 ? 's' : ''} left in your free trial · <a class="banner-link" href="#/subscription">Upgrade</a></div>`;
-  }
-
-  let workerCardsHtml = '';
-  let totalMonthAmount = 0;
-
-  if (workers.length === 0) {
-    workerCardsHtml = `
-      <div class="empty-state">
-        <div class="empty-state-icon">👥</div>
-        <h3>No workers yet</h3>
-        <p>Invite your first worker to get started.</p>
-        <button class="btn btn-primary" onclick="showInviteSheet()">Invite worker</button>
-      </div>`;
-  } else {
-    workerCardsHtml = workers.map(link => {
-      const wp = link.profiles;
-      const days = workerDays[link.worker_id] || [];
-      const full = days.filter(d => d.day_type === 'full').length;
-      const half = days.filter(d => d.day_type === 'half').length;
-      const total = full + half * 0.5;
-      const amount = total * link.day_rate;
-      totalMonthAmount += amount;
-      const lastDay = days.sort((a,b) => b.day_key.localeCompare(a.day_key))[0];
-      const color = avatarColor(wp?.full_name || '');
-      const initials = avatarInitials(wp?.full_name || '?');
-      return `
-        <div class="worker-card">
-          <div class="avatar" style="background:${color}">${initials}</div>
-          <div class="worker-card-info">
-            <div class="worker-name">${sanitize(wp?.full_name || 'Unknown')}</div>
-            <div class="worker-stats">This month: ${full} full + ${half} half = ${total} days</div>
-            <div class="worker-amount">${formatAUD(amount)}</div>
-            ${lastDay ? `<div class="text-xs text-muted">Last logged ${formatDate(lastDay.day_key)}</div>` : '<div class="text-xs text-muted">No days logged yet</div>'}
-          </div>
-          <a href="#/calendar/${link.worker_id}" class="btn btn-ghost btn-sm">View →</a>
-        </div>`;
-    }).join('');
-  }
-
-  el.innerHTML = `
-    <div class="page">
-      <h2 style="font-size:26px;margin-bottom:4px">${greeting()}, ${sanitize(profile.full_name?.split(' ')[0] || 'there')}</h2>
-      <p class="text-muted text-sm mb-16">${monthLabel(month, year)}</p>
-      ${bannerHtml}
-
-      ${workers.length > 0 ? `
-      <div class="card mb-16">
-        <div class="text-muted text-xs mb-4">Total invoiceable this month</div>
-        <div style="font-size:28px;color:var(--wheat);font-weight:600">${formatAUD(totalMonthAmount)}</div>
-      </div>` : ''}
-
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" onclick="showInviteSheet()">+ Add worker</button>
-        <a href="#/statements" class="btn btn-ghost btn-sm">View statements</a>
-        <a href="#/xero" class="btn btn-ghost btn-sm">Xero</a>
-      </div>
-
-      <h3 style="font-size:16px;margin-bottom:10px;color:var(--muted)">Your workers</h3>
-      ${workerCardsHtml}
-    </div>
-
-    <div id="invite-backdrop" class="sheet-backdrop" onclick="closeSheet()"></div>
-    <div id="invite-sheet" class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Invite a worker</div>
-      <form id="invite-form">
-        <div class="form-group">
-          <label class="form-label">Worker email</label>
-          <input type="email" id="inv-email" class="form-input" placeholder="worker@gmail.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Day rate (AUD)</label>
-          <input type="number" id="inv-rate" class="form-input" placeholder="350.00" min="1" step="0.01" required>
-        </div>
-        <div id="inv-error" class="form-error hidden mb-8"></div>
-        <button type="submit" class="btn btn-primary btn-full" id="inv-btn">Send invitation</button>
-        <button type="button" class="btn btn-ghost btn-full mt-8" onclick="closeSheet()">Cancel</button>
-      </form>
-    </div>
-  `;
-
-  document.getElementById('invite-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn = document.getElementById('inv-btn');
-    const errEl = document.getElementById('inv-error');
-    errEl.classList.add('hidden');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner spinner-sm"></div> Sending...';
-    const email = document.getElementById('inv-email').value.trim();
-    const rate = parseFloat(document.getElementById('inv-rate').value);
-    try {
-      const { error } = await db.functions.invoke('send-invitation', {
-        body: { admin_id: currentUser.id, invited_email: email, day_rate: rate }
-      });
-      if (error) throw error;
-      closeSheet();
-      showToast(`Invitation sent to ${email}`, 'success');
-      renderDashboard(el);
-    } catch {
-      errEl.textContent = 'Failed to send invitation. Check your connection and try again.';
-      errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Send invitation';
-    }
-  });
-}
-
-async function renderWorkerDashboard(el) {
-  const profile = currentProfile;
-  const now = getAEST();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-
-  // Get employer link
-  const { data: links } = await db.from('employer_worker_links')
-    .select('*, profiles:admin_id(full_name,business_name,email)')
-    .eq('worker_id', currentUser.id)
-    .eq('status', 'active');
-  const link = links?.[0];
-
-  // Get this month's days
-  const prefix = `${year}-${String(month).padStart(2,'0')}`;
-  const { data: days } = await db.from('labour_days')
-    .select('*')
-    .eq('worker_id', currentUser.id)
-    .like('day_key', `${prefix}%`);
-
-  const myDays = days || [];
-  const full = myDays.filter(d => d.day_type === 'full').length;
-  const half = myDays.filter(d => d.day_type === 'half').length;
-  const total = full + half * 0.5;
-  const amount = link ? total * link.day_rate : 0;
-
-  // YTD
-  const { data: ytdDays } = await db.from('labour_days').select('day_type').eq('worker_id', currentUser.id).gte('day_key', `${year}-01-01`);
-  const ytdFull = (ytdDays || []).filter(d => d.day_type === 'full').length;
-  const ytdHalf = (ytdDays || []).filter(d => d.day_type === 'half').length;
-  const ytdTotal = ytdFull + ytdHalf * 0.5;
-  const ytdAmount = link ? ytdTotal * link.day_rate : 0;
-
-  const employer = link?.profiles;
-  const bizName = employer?.business_name || employer?.full_name || 'Your employer';
-
-  el.innerHTML = `
-    <div class="page">
-      <h2 style="font-size:26px;margin-bottom:4px">${greeting()}, ${sanitize(profile.full_name?.split(' ')[0] || 'there')}</h2>
-      <p class="text-muted text-sm mb-16">${monthLabel(month, year)}</p>
-
-      <div class="card mb-12">
-        <div class="text-muted text-xs mb-8" style="text-transform:uppercase;letter-spacing:0.05em">This month</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div><div style="font-size:22px;font-weight:600;color:var(--green)">${full}</div><div class="text-xs text-muted">Full days</div></div>
-          <div><div style="font-size:22px;font-weight:600;color:var(--orange)">${half}</div><div class="text-xs text-muted">Half days</div></div>
-          <div><div style="font-size:22px;font-weight:600;color:var(--wheat)">${total}</div><div class="text-xs text-muted">Total days</div></div>
-          <div><div style="font-size:18px;font-weight:600;color:var(--wheat)">${formatAUD(amount)}</div><div class="text-xs text-muted">Total amount</div></div>
-        </div>
-      </div>
-
-      <a href="#/calendar" class="btn btn-primary btn-full mb-12" style="font-size:15px">Open my calendar</a>
-
-      ${link ? `
-      <div class="card mb-12">
-        <div class="text-muted text-xs mb-4" style="text-transform:uppercase;letter-spacing:0.05em">Employer</div>
-        <div class="fw-600">${sanitize(bizName)}</div>
-        <div class="text-sm text-muted">Day rate: ${formatAUD(link.day_rate)}</div>
-      </div>` : `
-      <div class="card mb-12">
-        <div class="text-muted text-sm">You haven't been linked to an employer yet. Ask your employer to send you an invitation.</div>
-      </div>`}
-
-      <div class="card">
-        <div class="text-muted text-xs mb-8" style="text-transform:uppercase;letter-spacing:0.05em">${year} Year to date</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><div style="font-size:18px;font-weight:600">${ytdTotal}</div><div class="text-xs text-muted">Total days</div></div>
-          <div><div style="font-size:16px;font-weight:600;color:var(--wheat)">${formatAUD(ytdAmount)}</div><div class="text-xs text-muted">Total earned</div></div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function showInviteSheet() {
-  document.getElementById('invite-backdrop')?.classList.add('visible');
-  document.getElementById('invite-sheet')?.classList.add('visible');
-}
-
-function closeSheet() {
-  document.querySelectorAll('.sheet-backdrop').forEach(b => b.classList.remove('visible'));
-  document.querySelectorAll('.sheet').forEach(s => s.classList.remove('visible'));
-}
-
-// ===== CALENDAR =====
-let calYear, calMonth, calDays = {}, calLink = null, calIsAdmin = false, calWorkerId = null, calBackfillEnabled = false;
-
-async function renderCalendar(el, workerId) {
-  el.innerHTML = `<div class="page"><div class="flex-center" style="min-height:60vh"><div class="spinner spinner-lg" style="color:var(--wheat)"></div></div></div>`;
-  if (!currentProfile) currentProfile = await loadProfile(currentUser.id);
-
-  const isAdmin = currentProfile.role === 'admin' || currentProfile.role === 'both';
-  calIsAdmin = isAdmin && workerId;
-  calWorkerId = workerId || currentUser.id;
-
-  const now = getAEST();
-  if (!calYear) { calYear = now.getFullYear(); calMonth = now.getMonth() + 1; }
-
-  // Get day rate from link
-  if (isAdmin && workerId) {
-    const { data: link } = await db.from('employer_worker_links')
-      .select('*')
-      .eq('admin_id', currentUser.id)
-      .eq('worker_id', workerId)
-      .single();
-    calLink = link;
-  } else {
-    const { data: link } = await db.from('employer_worker_links')
-      .select('*')
-      .eq('worker_id', currentUser.id)
-      .eq('status', 'active')
-      .single();
-    calLink = link;
-  }
-
-  await loadCalendarDays();
-  renderCalendarView(el);
-}
-
-async function loadCalendarDays() {
-  const prefix = `${calYear}-${String(calMonth).padStart(2,'0')}`;
-  let query = db.from('labour_days').select('*').like('day_key', `${prefix}%`).eq('worker_id', calWorkerId);
-  if (calIsAdmin) query = query.eq('admin_id', currentUser.id);
-  const { data } = await query;
-  calDays = {};
-  (data || []).forEach(d => { calDays[d.day_key] = d; });
-}
-
-function renderCalendarView(el) {
-  const now = getAEST();
-  const todayKey = dayKey(now);
-  const numDays = daysInMonth(calYear, calMonth);
-  const firstDay = firstDayOfMonth(calYear, calMonth);
-  const isCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth() + 1;
-
-  const full = Object.values(calDays).filter(d => d.day_type === 'full').length;
-  const half = Object.values(calDays).filter(d => d.day_type === 'half').length;
-  const total = full + half * 0.5;
-  const amount = calLink ? total * calLink.day_rate : 0;
-
-  let cells = '';
-  for (let i = 0; i < firstDay; i++) cells += '<div class="cal-day empty"></div>';
-
-  for (let d = 1; d <= numDays; d++) {
-    const dk = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const data = calDays[dk];
-    const isToday = dk === todayKey;
-    const isFuture = dk > todayKey && !isToday;
-    const isPastMonth = !isCurrentMonth && calMonth < now.getMonth() + 1;
-    const isBackfillable = calIsAdmin && calBackfillEnabled;
-    const canTap = !isFuture || (isBackfillable);
-    const locked = isFuture && !isBackfillable;
-    const cls = ['cal-day', data?.day_type || '', isToday ? 'today' : '', locked ? 'future' : ''].filter(Boolean).join(' ');
-    const noteIndicator = data?.notes ? '<div class="cal-day-note"></div>' : '';
-    const onclick = canTap ? `openDaySheet('${dk}')` : '';
-    cells += `<div class="${cls}" ${onclick ? `onclick="${onclick}"` : ''}>${d}${noteIndicator}</div>`;
-  }
-
-  const backfillToggle = calIsAdmin ? `
-    <div class="toggle-wrap card mb-12">
-      <div class="toggle-label-group">
-        <div class="toggle-label">Backfill mode</div>
-        <div class="toggle-desc">Enable to edit past months</div>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="backfill-toggle" ${calBackfillEnabled ? 'checked' : ''} onchange="toggleBackfill(this.checked, this.closest('.page').parentElement)">
-        <div class="toggle-slider"></div>
-      </label>
-    </div>` : '';
-
-  const workerName = calIsAdmin ? `<p class="text-muted text-sm mb-12">Viewing worker calendar</p>` : '';
-
-  el.innerHTML = `
-    <div class="page">
-      ${workerName}
-      ${backfillToggle}
-
-      <div class="cal-nav">
-        <button class="cal-nav-btn" onclick="calPrev(this.closest('.page').parentElement)">‹</button>
-        <div class="cal-month-label">${monthLabel(calMonth, calYear)}</div>
-        <button class="cal-nav-btn" onclick="calNext(this.closest('.page').parentElement)" ${isCurrentMonth && !calBackfillEnabled ? '' : ''}>›</button>
-      </div>
-
-      <div class="cal-grid">
-        ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="cal-header-cell">${d}</div>`).join('')}
-        ${cells}
-      </div>
-
-      <div class="cal-summary">
-        <div class="cal-summary-item"><div class="cal-summary-num" style="color:var(--green)">${full}</div><div class="cal-summary-label">Full days</div></div>
-        <div class="cal-summary-item"><div class="cal-summary-num" style="color:var(--orange)">${half}</div><div class="cal-summary-label">Half days</div></div>
-        <div class="cal-summary-item"><div class="cal-summary-num">${total}</div><div class="cal-summary-label">Total days</div></div>
-        <div class="cal-summary-item"><div class="cal-summary-num" style="font-size:16px">${formatAUD(amount)}</div><div class="cal-summary-label">Total amount</div></div>
-      </div>
-
-      ${calIsAdmin ? `<a href="#/workers" class="btn btn-ghost btn-full mt-16">← Back to workers</a>` : ''}
-    </div>
-
-    <div id="day-backdrop" class="sheet-backdrop" onclick="closeDaySheet()"></div>
-    <div id="day-sheet" class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title" id="day-sheet-title"></div>
-      <div class="day-type-grid" id="day-type-grid"></div>
-      <div class="form-group">
-        <label class="form-label">Notes <span class="text-muted">(optional, max 100 chars)</span></label>
-        <input type="text" id="day-notes" class="form-input" placeholder="e.g. Spraying north paddock" maxlength="100">
-      </div>
-      <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="btn btn-ghost" style="flex:1" onclick="closeDaySheet()">Cancel</button>
-        <button class="btn btn-primary" style="flex:2" id="day-save-btn" onclick="saveDay()">Save</button>
-      </div>
-    </div>
-  `;
-}
-
-let activeDayKey = null, activeDayType = null;
-
-function openDaySheet(dk) {
-  activeDayKey = dk;
-  const existing = calDays[dk];
-  activeDayType = existing?.day_type || null;
-
-  const date = new Date(dk + 'T00:00:00');
-  const label = date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  document.getElementById('day-sheet-title').textContent = label;
-  document.getElementById('day-notes').value = existing?.notes || '';
-
-  const rate = calLink?.day_rate || 0;
-  const types = [
-    { id: 'full', label: 'Full Day', amount: formatAUD(rate), cls: activeDayType === 'full' ? 'selected-full' : '' },
-    { id: 'half', label: 'Half Day', amount: formatAUD(rate * 0.5), cls: activeDayType === 'half' ? 'selected-half' : '' },
-    { id: 'clear', label: 'Clear', amount: '', cls: !activeDayType && existing === undefined ? '' : (activeDayType === null && existing ? 'selected-clear' : '') },
-  ];
-
-  document.getElementById('day-type-grid').innerHTML = types.map(t => `
-    <div class="day-type-btn ${t.cls}" id="dt-${t.id}" onclick="selectDayType('${t.id}')">
-      <div class="day-type-label">${t.label}</div>
-      <div class="day-type-amount">${t.amount}</div>
-    </div>`).join('');
-
-  document.getElementById('day-backdrop').classList.add('visible');
-  document.getElementById('day-sheet').classList.add('visible');
-  setTimeout(() => document.getElementById('day-notes').focus(), 300);
-}
-
-function selectDayType(type) {
-  activeDayType = type === 'clear' ? null : type;
-  ['full','half','clear'].forEach(t => {
-    const el = document.getElementById(`dt-${t}`);
-    if (el) el.className = 'day-type-btn';
-  });
-  if (type !== 'clear') {
-    document.getElementById(`dt-${type}`).classList.add(`selected-${type}`);
-  } else {
-    document.getElementById('dt-clear').classList.add('selected-clear');
-  }
-}
-
-async function saveDay() {
-  const btn = document.getElementById('day-save-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner spinner-sm"></div>';
-
-  const notes = sanitize(document.getElementById('day-notes').value.trim());
-  const existing = calDays[activeDayKey];
-
-  if (activeDayType === null) {
-    // Delete / clear
-    if (existing) {
-      if (navigator.onLine) {
-        const { error } = await db.from('labour_days').delete().eq('id', existing.id);
-        if (!error) {
-          await writeAudit('day_deleted', 'labour_days', existing.id, existing, null);
-          delete calDays[activeDayKey];
-        }
-      } else {
-        await queueOfflineAction('delete', 'labour_days', { id: existing.id });
-        delete calDays[activeDayKey];
-        showToast('Saved locally', 'info');
-      }
-    }
-  } else {
-    const adminId = calIsAdmin ? currentUser.id : (calLink?.admin_id || currentUser.id);
-    const payload = {
-      worker_id: calWorkerId,
-      admin_id: adminId,
-      day_key: activeDayKey,
-      day_type: activeDayType,
-      notes: notes || null,
-    };
-
-    if (navigator.onLine) {
-      const { data, error } = await db.from('labour_days').upsert(payload, { onConflict: 'worker_id,admin_id,day_key' }).select().single();
-      if (!error && data) {
-        const isNew = !existing;
-        await writeAudit(isNew ? 'day_logged' : 'day_edited', 'labour_days', data.id, existing || null, data);
-        calDays[activeDayKey] = data;
-      } else if (error) {
-        showToast('Failed to save. Please try again.', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Save';
-        return;
-      }
-    } else {
-      await queueOfflineAction('upsert', 'labour_days', payload);
-      calDays[activeDayKey] = { ...payload, id: 'offline-' + Date.now() };
-      showToast('Saved locally — will sync when online', 'info');
-    }
-  }
-
-  closeDaySheet();
-  renderCalendarView(document.getElementById('view-container'));
-  btn.disabled = false;
-  btn.textContent = 'Save';
-}
-
-function closeDaySheet() {
-  document.getElementById('day-backdrop')?.classList.remove('visible');
-  document.getElementById('day-sheet')?.classList.remove('visible');
-  activeDayKey = null;
-  activeDayType = null;
-}
-
-async function calPrev(el) {
-  calMonth--;
-  if (calMonth < 1) { calMonth = 12; calYear--; }
-  await loadCalendarDays();
-  renderCalendarView(el || document.getElementById('view-container'));
-}
-
-async function calNext(el) {
-  calMonth++;
-  if (calMonth > 12) { calMonth = 1; calYear++; }
-  await loadCalendarDays();
-  renderCalendarView(el || document.getElementById('view-container'));
-}
-
-async function toggleBackfill(enabled, el) {
-  calBackfillEnabled = enabled;
-  await loadCalendarDays();
-  renderCalendarView(el || document.getElementById('view-container'));
-}
-
-// ===== WORKERS =====
-async function renderWorkers(el) {
-  el.innerHTML = `<div class="page"><div class="flex-center" style="min-height:60vh"><div class="spinner spinner-lg" style="color:var(--wheat)"></div></div></div>`;
-
-  const { data: links } = await db.from('employer_worker_links')
-    .select('*, profiles:worker_id(id,full_name,email)')
-    .eq('admin_id', currentUser.id)
-    .order('created_at');
-
-  const { data: pendingInvites } = await db.from('invitations')
-    .select('*')
-    .eq('admin_id', currentUser.id)
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false });
-
-  const active = (links || []).filter(l => l.status === 'active');
-  const inactive = (links || []).filter(l => l.status !== 'active');
-
-  function workerRow(link) {
-    const wp = link.profiles;
-    const color = avatarColor(wp?.full_name || '');
-    const initials = avatarInitials(wp?.full_name || '?');
-    return `
-      <div class="worker-card" id="wcard-${link.id}">
-        <div class="avatar" style="background:${color}">${initials}</div>
-        <div class="worker-card-info">
-          <div class="worker-name">${sanitize(wp?.full_name || 'Unknown')}</div>
-          <div class="text-sm text-muted">${sanitize(wp?.email || '')}</div>
-          <div class="text-sm mt-4">Rate: <span id="rate-display-${link.id}">${formatAUD(link.day_rate)}/day</span></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <a href="#/calendar/${link.worker_id}" class="btn btn-ghost btn-sm">Calendar</a>
-          <button class="btn btn-ghost btn-sm" onclick="editRate('${link.id}',${link.day_rate})">Edit rate</button>
-          <button class="btn btn-danger btn-sm" onclick="removeWorker('${link.id}','${link.worker_id}','${sanitize(wp?.full_name || 'Worker')}')">Remove</button>
-        </div>
-      </div>`;
-  }
-
-  el.innerHTML = `
-    <div class="page">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <h2 style="font-size:24px">Workers</h2>
-        <button class="btn btn-primary btn-sm" onclick="showWorkerInviteSheet()">+ Invite worker</button>
-      </div>
-
-      ${active.length === 0 ? `<div class="empty-state"><div class="empty-state-icon">👥</div><h3>No active workers</h3><p>Invite workers to get started.</p></div>` : active.map(workerRow).join('')}
-
-      ${pendingInvites?.length > 0 ? `
-      <h3 style="font-size:16px;margin:20px 0 10px;color:var(--muted)">Pending invitations</h3>
-      ${pendingInvites.map(inv => `
-        <div class="card" style="display:flex;align-items:center;gap:12px">
-          <div style="flex:1">
-            <div class="fw-600">${sanitize(inv.invited_email)}</div>
-            <div class="text-xs text-muted">Sent ${formatDate(inv.created_at?.split('T')[0])} · ${formatAUD(inv.day_rate)}/day</div>
-          </div>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-sm" onclick="resendInvite('${inv.id}','${sanitize(inv.invited_email)}',${inv.day_rate})">Resend</button>
-            <button class="btn btn-danger btn-sm" onclick="cancelInvite('${inv.id}')">Cancel</button>
-          </div>
-        </div>`).join('')}` : ''}
-    </div>
-
-    <div id="worker-invite-backdrop" class="sheet-backdrop" onclick="closeSheet()"></div>
-    <div id="worker-invite-sheet" class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Invite a worker</div>
-      <form id="wi-form">
-        <div class="form-group"><label class="form-label">Worker email</label><input type="email" id="wi-email" class="form-input" placeholder="worker@gmail.com" required></div>
-        <div class="form-group"><label class="form-label">Day rate (AUD)</label><input type="number" id="wi-rate" class="form-input" placeholder="350.00" min="1" step="0.01" required></div>
-        <div id="wi-error" class="form-error hidden mb-8"></div>
-        <button type="submit" class="btn btn-primary btn-full" id="wi-btn">Send invitation</button>
-        <button type="button" class="btn btn-ghost btn-full mt-8" onclick="closeSheet()">Cancel</button>
-      </form>
-    </div>
-
-    <div id="remove-modal" class="modal-backdrop hidden">
-      <div class="modal">
-        <div class="modal-title">Remove worker?</div>
-        <p id="remove-modal-msg" class="text-sm text-muted"></p>
-        <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="document.getElementById('remove-modal').classList.add('hidden')">Cancel</button>
-          <button class="btn btn-danger" id="remove-confirm-btn">Remove</button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('wi-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn = document.getElementById('wi-btn');
-    const errEl = document.getElementById('wi-error');
-    errEl.classList.add('hidden');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner spinner-sm"></div> Sending...';
-    const email = document.getElementById('wi-email').value.trim();
-    const rate = parseFloat(document.getElementById('wi-rate').value);
-    try {
-      const { error } = await db.functions.invoke('send-invitation', { body: { admin_id: currentUser.id, invited_email: email, day_rate: rate } });
-      if (error) throw error;
-      closeSheet();
-      showToast(`Invitation sent to ${email}`, 'success');
-      renderWorkers(el);
-    } catch {
-      errEl.textContent = 'Failed to send invitation.';
-      errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Send invitation';
-    }
-  });
-}
-
-function showWorkerInviteSheet() {
-  document.getElementById('worker-invite-backdrop')?.classList.add('visible');
-  document.getElementById('worker-invite-sheet')?.classList.add('visible');
-}
-
-function editRate(linkId, currentRate) {
-  const displayEl = document.getElementById(`rate-display-${linkId}`);
-  if (!displayEl) return;
-  const parent = displayEl.parentElement;
-  parent.innerHTML = `<div style="display:flex;align-items:center;gap:6px">
-    <input type="number" id="rate-input-${linkId}" value="${currentRate}" min="1" step="0.01" style="width:80px;padding:4px 8px;border:1px solid var(--wheat);border-radius:4px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13px">
-    <button class="btn btn-primary btn-sm" onclick="saveRate('${linkId}')">Save</button>
-    <button class="btn btn-ghost btn-sm" onclick="renderWorkers(document.getElementById('view-container'))">✕</button>
-  </div>`;
-}
-
-async function saveRate(linkId) {
-  const inp = document.getElementById(`rate-input-${linkId}`);
-  const newRate = parseFloat(inp.value);
-  if (!newRate || newRate <= 0) { showToast('Invalid rate', 'error'); return; }
-  const { data: link } = await db.from('employer_worker_links').select('day_rate').eq('id', linkId).single();
-  const oldRate = link?.day_rate;
-  const { error } = await db.from('employer_worker_links').update({ day_rate: newRate }).eq('id', linkId).eq('admin_id', currentUser.id);
-  if (error) { showToast('Failed to update rate', 'error'); return; }
-  await writeAudit('day_rate_changed', 'employer_worker_links', linkId, { day_rate: oldRate }, { day_rate: newRate }, 'admin');
-  showToast('Day rate updated', 'success');
-  renderWorkers(document.getElementById('view-container'));
-}
-
-function removeWorker(linkId, workerId, name) {
-  const modal = document.getElementById('remove-modal');
-  document.getElementById('remove-modal-msg').textContent = `Removing ${name} will unlink them from your account. Their historical data is retained.`;
-  document.getElementById('remove-confirm-btn').onclick = async () => {
-    await db.from('employer_worker_links').update({ status: 'inactive' }).eq('id', linkId).eq('admin_id', currentUser.id);
-    await writeAudit('worker_unlinked', 'employer_worker_links', linkId, null, { status: 'inactive' }, 'admin');
-    modal.classList.add('hidden');
-    showToast(`${name} removed`, 'success');
-    renderWorkers(document.getElementById('view-container'));
-  };
-  modal.classList.remove('hidden');
-}
-
-async function resendInvite(inviteId, email, dayRate) {
-  try {
-    await db.functions.invoke('send-invitation', { body: { admin_id: currentUser.id, invited_email: email, day_rate: dayRate } });
-    showToast(`Invitation resent to ${email}`, 'success');
-  } catch { showToast('Failed to resend', 'error'); }
-}
-
-async function cancelInvite(inviteId) {
-  await db.from('invitations').update({ status: 'expired' }).eq('id', inviteId).eq('admin_id', currentUser.id);
-  showToast('Invitation cancelled', 'success');
-  renderWorkers(document.getElementById('view-container'));
-}
-
-// ===== STATEMENTS =====
-async function renderStatements(el) {
-  el.innerHTML = `<div class="page"><div class="flex-center" style="min-height:60vh"><div class="spinner spinner-lg" style="color:var(--wheat)"></div></div></div>`;
-
-  const now = getAEST();
-  let filterMonth = now.getMonth() + 1;
-  let filterYear = now.getFullYear();
-  let filterWorker = 'all';
-
-  const { data: links } = await db.from('employer_worker_links').select('*, profiles:worker_id(id,full_name)').eq('admin_id', currentUser.id).eq('status', 'active');
-  const workers = links || [];
-
-  async function loadStatements() {
-    let q = db.from('monthly_statements').select('*, profiles:worker_id(id,full_name,email)').eq('admin_id', currentUser.id).eq('month', filterMonth).eq('year', filterYear).order('created_at', { ascending: false });
-    if (filterWorker !== 'all') q = q.eq('worker_id', filterWorker);
-    const { data } = await q;
-    return data || [];
-  }
-
-  async function render() {
-    const statements = await loadStatements();
-
-    el.innerHTML = `
-      <div class="page">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <h2 style="font-size:24px">Statements</h2>
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-          <select id="st-month" class="form-input" style="width:auto;padding:8px 12px;flex:1">
-            ${Array.from({length:12},(_,i)=>i+1).map(m=>`<option value="${m}" ${m===filterMonth?'selected':''}>${new Date(filterYear,m-1).toLocaleString('en-AU',{month:'long'})}</option>`).join('')}
-          </select>
-          <select id="st-year" class="form-input" style="width:auto;padding:8px 12px">
-            ${[now.getFullYear(), now.getFullYear()-1].map(y=>`<option value="${y}" ${y===filterYear?'selected':''}>${y}</option>`).join('')}
-          </select>
-          <select id="st-worker" class="form-input" style="width:auto;padding:8px 12px;flex:1">
-            <option value="all">All workers</option>
-            ${workers.map(w=>`<option value="${w.worker_id}" ${w.worker_id===filterWorker?'selected':''}>${sanitize(w.profiles?.full_name||'Unknown')}</option>`).join('')}
-          </select>
-        </div>
-
-        <button class="btn btn-primary btn-full mb-16" id="gen-btn" onclick="generateStatements(${filterMonth},${filterYear})">Generate statements for ${monthLabel(filterMonth, filterYear)}</button>
-
-        ${statements.length === 0 ? `
-          <div class="empty-state">
-            <div class="empty-state-icon">📄</div>
-            <h3>No statements yet</h3>
-            <p>Statements are generated automatically at month end, or generate them manually above.</p>
-          </div>` :
-          statements.map(s => {
-            const wp = s.profiles;
-            return `
-              <div class="card">
-                <div style="display:flex;align-items:center;gap:12px">
-                  <div class="avatar" style="background:${avatarColor(wp?.full_name||'')}">
-                    ${avatarInitials(wp?.full_name||'?')}
-                  </div>
-                  <div style="flex:1;min-width:0">
-                    <div class="fw-600">${sanitize(wp?.full_name||'Unknown')}</div>
-                    <div class="text-sm text-muted">${monthLabel(s.month, s.year)} · ${s.total_days} days · ${formatAUD(s.total_amount)}</div>
-                    ${s.xero_invoice_number ? `<div class="text-xs text-muted">Xero: ${sanitize(s.xero_invoice_number)}</div>` : ''}
-                  </div>
-                  <span class="badge badge-${s.status}">${s.status}</span>
-                </div>
-                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-                  <button class="btn btn-ghost btn-sm" onclick="viewStatement('${s.id}')">View detail</button>
-                  ${!s.xero_invoice_id ? `<button class="btn btn-ghost btn-sm" onclick="pushToXero('${s.id}')">Send to Xero</button>` : ''}
-                  ${s.status !== 'draft' ? `<button class="btn btn-ghost btn-sm" onclick="resendStatement('${s.id}')">Resend email</button>` : ''}
-                </div>
-              </div>`;
-          }).join('')}
-      </div>
-
-      <div id="stmt-modal" class="modal-backdrop hidden">
-        <div class="modal" id="stmt-modal-body"></div>
-      </div>
-    `;
-
-    document.getElementById('st-month').addEventListener('change', e => { filterMonth = parseInt(e.target.value); render(); });
-    document.getElementById('st-year').addEventListener('change', e => { filterYear = parseInt(e.target.value); render(); });
-    document.getElementById('st-worker').addEventListener('change', e => { filterWorker = e.target.value; render(); });
-  }
-
-  await render();
-}
-
-async function generateStatements(month, year) {
-  const btn = document.getElementById('gen-btn');
-  if (!btn) return;
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner spinner-sm"></div> Generating...';
-  try {
-    const { error } = await db.functions.invoke('send-monthly-statements', { body: { admin_id: currentUser.id, month, year } });
-    if (error) throw error;
-    showToast('Statements generated successfully', 'success');
-    renderStatements(document.getElementById('view-container'));
-  } catch {
-    showToast('Failed to generate statements', 'error');
+    btn.classList.remove('done');
+    document.getElementById('log-icon').textContent = '☀️';
+    document.getElementById('log-txt').textContent  = 'Log today\'s work';
     btn.disabled = false;
-    btn.textContent = `Generate statements for ${monthLabel(month, year)}`;
+    undo.style.display = 'none';
   }
+
+  // Recent days
+  const { data: rows } = await db
+    .from('work_logs').select('date')
+    .order('date', {ascending:false}).limit(10);
+
+  const list = document.getElementById('josh-list');
+  if (!rows || rows.length === 0) {
+    list.innerHTML = '<div class="empty">No days logged yet — tap the button!</div>';
+    return;
+  }
+  list.innerHTML = rows.map(r => `
+    <div class="day-row">
+      <div class="dot"></div>
+      <span>${fmtDate(r.date)}</span>
+    </div>`).join('');
 }
 
-async function viewStatement(id) {
-  const { data: s } = await db.from('monthly_statements').select('*, profiles:worker_id(full_name,email)').eq('id', id).single();
-  if (!s) return;
-  const breakdown = s.day_breakdown || [];
-  const modal = document.getElementById('stmt-modal');
-  document.getElementById('stmt-modal-body').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div class="modal-title" style="margin:0">${monthLabel(s.month, s.year)} — ${sanitize(s.profiles?.full_name||'')}</div>
-      <button onclick="document.getElementById('stmt-modal').classList.add('hidden')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
-    </div>
-    <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
-      <div><span class="badge badge-${s.status}">${s.status}</span></div>
-      <div class="text-sm text-muted">${s.full_days} full + ${s.half_days} half = ${s.total_days} days</div>
-      <div class="text-sm fw-600">${formatAUD(s.total_amount)}</div>
-    </div>
-    ${s.xero_invoice_number ? `<div class="text-sm mb-8">Xero invoice: <strong>${sanitize(s.xero_invoice_number)}</strong>${s.xero_invoice_url ? ` <a href="${sanitize(s.xero_invoice_url)}" target="_blank" rel="noopener">View →</a>` : ''}</div>` : ''}
-    ${s.sent_at ? `<div class="text-sm text-muted mb-8">Emailed to ${sanitize(s.email_sent_to)} on ${formatDate(s.sent_at?.split('T')[0])}</div>` : ''}
-    ${breakdown.length > 0 ? `
-    <div style="overflow-x:auto">
-      <table class="data-table">
-        <thead><tr><th>Date</th><th>Type</th><th>Notes</th><th>Amount</th></tr></thead>
-        <tbody>${breakdown.map(b => `<tr><td>${formatDate(b.day_key)}</td><td>${b.day_type}</td><td>${sanitize(b.notes||'')}</td><td>${formatAUD(b.amount)}</td></tr>`).join('')}</tbody>
-      </table>
-    </div>` : '<p class="text-sm text-muted">No day breakdown available.</p>'}
-  `;
-  modal.classList.remove('hidden');
-}
+async function logToday() {
+  const btn = document.getElementById('log-btn');
+  btn.disabled = true;
+  document.getElementById('log-txt').textContent = 'Logging...';
 
-async function pushToXero(stmtId) {
-  if (!confirm('Push this statement to Xero as an invoice?')) return;
-  try {
-    const { error } = await db.functions.invoke('send-monthly-statements', { body: { statement_id: stmtId, push_xero: true } });
-    if (error) throw error;
-    showToast('Invoice pushed to Xero', 'success');
-    renderStatements(document.getElementById('view-container'));
-  } catch { showToast('Failed to push to Xero', 'error'); }
-}
+  const { error } = await db.from('work_logs').insert({ date: todayISO() });
 
-async function resendStatement(stmtId) {
-  if (!confirm('Resend the email for this statement?')) return;
-  try {
-    const { error } = await db.functions.invoke('send-monthly-statements', { body: { statement_id: stmtId, resend_email: true } });
-    if (error) throw error;
-    showToast('Statement email resent', 'success');
-  } catch { showToast('Failed to resend email', 'error'); }
-}
-
-// ===== XERO =====
-async function renderXero(el) {
-  if (!currentProfile) currentProfile = await loadProfile(currentUser.id);
-  const connected = !!currentProfile.xero_tenant_id;
-
-  el.innerHTML = `
-    <div class="page">
-      <h2 style="font-size:24px;margin-bottom:20px">Xero Integration</h2>
-
-      ${connected ? `
-        <div class="card mb-16" style="border-color:var(--green)">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <span style="font-size:20px">✅</span>
-            <div class="fw-600">${sanitize(currentProfile.xero_org_name || 'Xero')} connected</div>
-          </div>
-          <div class="text-sm text-muted">Invoices will be created automatically at month end.</div>
-        </div>
-        <button class="btn btn-danger btn-full" onclick="disconnectXero()">Disconnect Xero</button>
-      ` : `
-        <div class="card mb-16">
-          <p class="fw-600 mb-8">What this integration does:</p>
-          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
-            <li class="text-sm">✓ Automatically creates invoices in Xero at the end of each month</li>
-            <li class="text-sm">✓ Maps each worker to a Xero contact</li>
-            <li class="text-sm">✓ Sends invoice links in monthly email statements</li>
-          </ul>
-        </div>
-
-        <div class="card mb-16">
-          <p class="fw-600 mb-8">Setup instructions</p>
-          <ol style="padding-left:16px;display:flex;flex-direction:column;gap:6px">
-            <li class="text-sm">Go to <strong>developer.xero.com</strong> and sign in</li>
-            <li class="text-sm">Click <strong>New App</strong> → Integration type: <strong>Web app</strong></li>
-            <li class="text-sm">Set redirect URI to:</li>
-          </ol>
-          <div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:8px 12px;margin-top:8px;font-size:12px;word-break:break-all">
-            https://qfuffybirntwooanvtte.supabase.co/functions/v1/xero-callback
-          </div>
-          <p class="text-xs text-muted mt-8">OAuth scopes required: openid profile email accounting.transactions accounting.contacts offline_access</p>
-        </div>
-
-        <button class="btn btn-primary btn-full" onclick="startXeroOAuth()">Connect Xero</button>
-      `}
-    </div>
-  `;
-}
-
-async function disconnectXero() {
-  if (!confirm('Disconnect Xero? Future invoices will not be created automatically.')) return;
-  await db.from('profiles').update({
-    xero_tenant_id: null,
-    xero_access_token_encrypted: null,
-    xero_refresh_token_encrypted: null,
-    xero_token_expiry: null,
-    xero_org_name: null,
-  }).eq('id', currentUser.id);
-  await writeAudit('xero_disconnected', 'profiles', currentUser.id, { xero_connected: true }, { xero_connected: false }, 'admin');
-  currentProfile.xero_tenant_id = null;
-  showToast('Xero disconnected', 'success');
-  renderXero(document.getElementById('view-container'));
-}
-
-// ===== SETTINGS =====
-async function renderSettings(el, params) {
-  if (!currentProfile) currentProfile = await loadProfile(currentUser.id);
-  let activeTab = params?.tab || 'profile';
-
-  const tabs = [
-    { id: 'profile', label: 'Profile' },
-    { id: 'password', label: 'Password' },
-    { id: 'notifications', label: 'Notifications' },
-    { id: 'subscription', label: 'Subscription' },
-    { id: 'audit', label: 'Audit Log' },
-    { id: 'danger', label: 'Danger Zone' },
-  ];
-
-  async function renderTabContent() {
-    const tabContent = document.getElementById('settings-tab-content');
-    if (!tabContent) return;
-    tabs.forEach(t => {
-      const btn = document.querySelector(`.tab-btn[data-tab="${t.id}"]`);
-      if (btn) btn.classList.toggle('active', t.id === activeTab);
-    });
-
-    if (activeTab === 'profile') {
-      tabContent.innerHTML = `
-        <form id="profile-form">
-          <div class="form-group"><label class="form-label">Full name</label><input type="text" id="s-name" class="form-input" value="${sanitize(currentProfile.full_name||'')}"></div>
-          <div class="form-group"><label class="form-label">Email <span class="text-muted">(contact support to change)</span></label><input type="email" class="form-input" value="${sanitize(currentProfile.email||'')}" disabled style="opacity:0.5"></div>
-          <div class="form-group"><label class="form-label">Business name</label><input type="text" id="s-biz" class="form-input" value="${sanitize(currentProfile.business_name||'')}"></div>
-          <div class="form-group"><label class="form-label">ABN</label><input type="text" id="s-abn" class="form-input" value="${sanitize(currentProfile.abn||'')}"></div>
-          <div id="profile-error" class="form-error hidden mb-8"></div>
-          <button type="submit" class="btn btn-primary" id="profile-save-btn">Save changes</button>
-        </form>`;
-      document.getElementById('profile-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const btn = document.getElementById('profile-save-btn');
-        btn.disabled = true; btn.innerHTML = '<div class="spinner spinner-sm"></div>';
-        const updates = {
-          full_name: sanitize(document.getElementById('s-name').value.trim()),
-          business_name: sanitize(document.getElementById('s-biz').value.trim()) || null,
-          abn: sanitize(document.getElementById('s-abn').value.trim()) || null,
-        };
-        const { error } = await db.from('profiles').update(updates).eq('id', currentUser.id);
-        if (error) { document.getElementById('profile-error').textContent = error.message; document.getElementById('profile-error').classList.remove('hidden'); }
-        else { Object.assign(currentProfile, updates); showToast('Profile saved', 'success'); }
-        btn.disabled = false; btn.textContent = 'Save changes';
-      });
-    } else if (activeTab === 'password') {
-      tabContent.innerHTML = `
-        <form id="pw-form">
-          <div class="form-group"><label class="form-label">New password</label><div class="input-wrap"><input type="password" id="s-pw" class="form-input" placeholder="Min 8 characters" minlength="8" required><button type="button" class="input-toggle" onclick="togglePw('s-pw',this)">👁</button></div></div>
-          <div class="form-group"><label class="form-label">Confirm new password</label><div class="input-wrap"><input type="password" id="s-pw2" class="form-input" placeholder="Repeat password" required><button type="button" class="input-toggle" onclick="togglePw('s-pw2',this)">👁</button></div></div>
-          <div id="pw-error" class="form-error hidden mb-8"></div>
-          <button type="submit" class="btn btn-primary" id="pw-save-btn">Update password</button>
-        </form>`;
-      document.getElementById('pw-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const btn = document.getElementById('pw-save-btn');
-        const errEl = document.getElementById('pw-error');
-        const pw = document.getElementById('s-pw').value;
-        const pw2 = document.getElementById('s-pw2').value;
-        if (pw !== pw2) { errEl.textContent = 'Passwords do not match.'; errEl.classList.remove('hidden'); return; }
-        btn.disabled = true; btn.innerHTML = '<div class="spinner spinner-sm"></div>';
-        const { error } = await db.auth.updateUser({ password: pw });
-        if (error) { errEl.textContent = error.message; errEl.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Update password'; }
-        else { showToast('Password updated', 'success'); document.getElementById('pw-form').reset(); btn.disabled = false; btn.textContent = 'Update password'; }
-      });
-    } else if (activeTab === 'notifications') {
-      tabContent.innerHTML = `
-        <form id="notif-form">
-          <div class="form-group">
-            <label class="form-label">Statement CC email <span class="text-muted">(optional)</span></label>
-            <input type="email" id="s-cc" class="form-input" placeholder="accountant@gmail.com" value="${sanitize(currentProfile.statement_cc_email||'')}">
-            <div class="form-hint">A copy of each statement email will be sent here.</div>
-          </div>
-          <div class="card">
-            <div class="toggle-wrap">
-              <div class="toggle-label-group">
-                <div class="toggle-label">Auto-send monthly statements</div>
-                <div class="toggle-desc">Automatically send statements and Xero invoices on the last day of each month.</div>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" id="s-autosend" ${currentProfile.monthly_auto_send ? 'checked' : ''}>
-                <div class="toggle-slider"></div>
-              </label>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary mt-12" id="notif-save-btn">Save</button>
-        </form>`;
-      document.getElementById('notif-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const btn = document.getElementById('notif-save-btn');
-        btn.disabled = true;
-        const cc = sanitize(document.getElementById('s-cc').value.trim());
-        const auto = document.getElementById('s-autosend').checked;
-        await db.from('profiles').update({ statement_cc_email: cc || null, monthly_auto_send: auto }).eq('id', currentUser.id);
-        currentProfile.statement_cc_email = cc;
-        currentProfile.monthly_auto_send = auto;
-        showToast('Notifications saved', 'success');
-        btn.disabled = false;
-      });
-    } else if (activeTab === 'subscription') {
-      const left = trialDaysLeft(currentProfile);
-      tabContent.innerHTML = `
-        <div class="card mb-12">
-          <div class="text-muted text-xs mb-4">Current plan</div>
-          <div class="fw-600" style="font-size:16px">Free trial</div>
-          <div class="text-sm text-muted mt-4">${left > 0 ? `${left} days remaining` : 'Trial expired'}</div>
-          <span class="badge badge-${currentProfile.subscription_status}" style="margin-top:8px">${currentProfile.subscription_status}</span>
-        </div>
-        <a href="#/subscription" class="btn btn-primary btn-full">Manage subscription</a>`;
-    } else if (activeTab === 'audit') {
-      tabContent.innerHTML = `<div class="flex-center" style="min-height:120px"><div class="spinner spinner-md" style="color:var(--wheat)"></div></div>`;
-      const { data: logs } = await db.from('audit_log').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(100);
-      const actionFilter = ['all','day_logged','day_edited','day_deleted','statement_sent','xero_invoice_created','day_rate_changed','worker_linked','worker_unlinked'];
-
-      tabContent.innerHTML = `
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-          <select id="audit-filter" class="form-input" style="width:auto;padding:8px 12px;flex:1">
-            ${actionFilter.map(a=>`<option value="${a}">${a === 'all' ? 'All actions' : a.replace(/_/g,' ')}</option>`).join('')}
-          </select>
-          <button class="btn btn-ghost btn-sm" onclick="exportAuditCSV()">Export CSV</button>
-        </div>
-        ${(logs||[]).length === 0 ? '<p class="text-muted text-sm">No audit entries yet.</p>' : `
-        <div style="overflow-x:auto">
-          <table class="data-table" id="audit-table">
-            <thead><tr><th>Date/Time</th><th>Action</th><th>Record</th><th>Role</th></tr></thead>
-            <tbody>
-              ${(logs||[]).map(l=>`<tr data-action="${l.action}"><td class="text-xs">${new Date(l.created_at).toLocaleString('en-AU')}</td><td class="text-xs">${l.action.replace(/_/g,' ')}</td><td class="text-xs">${l.record_id||'—'}</td><td class="text-xs">${l.performed_by_role}</td></tr>`).join('')}
-            </tbody>
-          </table>
-        </div>`}
-      `;
-      document.getElementById('audit-filter')?.addEventListener('change', e => {
-        const val = e.target.value;
-        document.querySelectorAll('#audit-table tbody tr').forEach(row => {
-          row.style.display = (val === 'all' || row.dataset.action === val) ? '' : 'none';
-        });
-      });
-    } else if (activeTab === 'danger') {
-      tabContent.innerHTML = `
-        <div class="card" style="border-color:var(--red)">
-          <h3 class="fw-600 text-red" style="margin-bottom:8px">Delete my account</h3>
-          <p class="text-sm text-muted mb-12">This permanently deletes all your data including all worker records and statements. This cannot be undone.</p>
-          <p class="text-sm mb-8">Type <strong>DELETE</strong> to confirm:</p>
-          <input type="text" id="delete-confirm" class="form-input mb-8" placeholder="Type DELETE">
-          <button class="btn btn-danger btn-full" onclick="deleteAccount()">Delete my account permanently</button>
-        </div>`;
+  if (error) {
+    if (error.code === '23505') {
+      showToast('Already logged today!');
+    } else {
+      showToast('Could not log — check your connection');
+      btn.disabled = false;
+      document.getElementById('log-txt').textContent = 'Log today\'s work';
+      return;
     }
+  } else {
+    showToast('Day logged ✓');
   }
-
-  el.innerHTML = `
-    <div class="page">
-      <h2 style="font-size:24px;margin-bottom:16px">Settings</h2>
-      <div class="tab-nav">
-        ${tabs.map(t => `<button class="tab-btn${t.id === activeTab ? ' active' : ''}" data-tab="${t.id}" onclick="switchSettingsTab('${t.id}')">${t.label}</button>`).join('')}
-      </div>
-      <div id="settings-tab-content"></div>
-    </div>
-  `;
-
-  window.switchSettingsTab = (tab) => { activeTab = tab; renderTabContent(); };
-  renderTabContent();
+  loadJosh();
 }
 
-function exportAuditCSV() {
-  const rows = document.querySelectorAll('#audit-table tbody tr');
-  const lines = [['Date/Time','Action','Record','Role']];
-  rows.forEach(r => {
-    const cells = r.querySelectorAll('td');
-    lines.push([...cells].map(c => `"${c.textContent.replace(/"/g,'""')}"`));
-  });
-  const csv = lines.map(l => l.join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'paddockpay-audit-log.csv';
-  a.click();
+async function undoToday() {
+  const { error } = await db
+    .from('work_logs').delete().eq('date', todayISO());
+  if (error) { showToast('Could not undo — try again'); return; }
+  showToast('Removed today\'s entry');
+  loadJosh();
 }
 
-async function deleteAccount() {
-  const confirmText = document.getElementById('delete-confirm')?.value;
-  if (confirmText !== 'DELETE') { showToast('Type DELETE exactly to confirm', 'error'); return; }
-  // Account deletion via Supabase Auth — cascades to all profile data
-  const { error } = await db.rpc('delete_user');
-  if (error) { showToast('Contact support@paddockpay.com.au to delete your account.', 'error'); return; }
-  await db.auth.signOut();
-  currentUser = null; currentProfile = null;
-  showToast('Account deleted', 'success');
-  navigate('/');
+// ── JANINE ────────────────────────────────────────────────
+function changeMonth(dir) {
+  curMonth.setMonth(curMonth.getMonth() + dir);
+  loadJanine();
 }
 
-// ===== SUBSCRIPTION =====
-function renderSubscription(el) {
-  el.innerHTML = `
-    <div class="page">
-      <h2 style="font-size:24px;margin-bottom:20px">Subscription</h2>
+async function loadJanine() {
+  const y = curMonth.getFullYear();
+  const m = curMonth.getMonth();
 
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <span style="font-size:14px;color:var(--muted)">Monthly</span>
-        <label class="toggle">
-          <input type="checkbox" id="billing-toggle">
-          <div class="toggle-slider"></div>
-        </label>
-        <span style="font-size:14px;color:var(--muted)">Yearly <span class="badge badge-trial">Save 20%</span></span>
-      </div>
+  const label = fmtMonth(curMonth);
+  document.getElementById('month-lbl').textContent  = label;
+  document.getElementById('print-sub').textContent  =
+    'Josh Pye  ·  ' + label + '  ·  Rate: $' + DAY_RATE + '/day';
 
-      <div class="pricing-card" style="margin:0 0 20px">
-        <div class="pricing-plan">PaddockPay Pro</div>
-        <div class="pricing-price"><span class="badge badge-trial" style="font-size:20px;padding:8px 16px">Coming Soon</span></div>
-        <ul class="pricing-features">
-          <li>Unlimited day tracking</li>
-          <li>Xero invoice sync</li>
-          <li>Automatic monthly statements</li>
-          <li>Multi-worker support</li>
-          <li>Audit log</li>
-          <li>iOS + Android PWA</li>
-        </ul>
-        <div id="sub-trial-info" class="text-sm text-muted text-center mb-12"></div>
-        <button class="btn btn-primary btn-full" onclick="notifyPricing()">Notify me when pricing is live</button>
-        <p class="text-xs text-muted text-center mt-8">No credit card required during trial</p>
-      </div>
+  const start = `${y}-${pad(m+1)}-01`;
+  const end   = `${y}-${pad(m+1)}-${pad(new Date(y, m+1, 0).getDate())}`;
 
-      ${currentProfile ? `<p class="text-sm text-muted text-center">${trialDaysLeft(currentProfile)} days remaining in your trial</p>` : ''}
+  document.getElementById('janine-list').innerHTML = '<div class="spinner"></div>';
 
-      <!-- TODO [STRIPE]: Activate Stripe checkout when pricing goes live:
-      async function startCheckout(priceId) {
-        // const { data } = await db.functions.invoke('create-checkout-session', { body: { price_id: priceId } });
-        // window.location.href = data.url;
-      }
-      -->
-    </div>
-  `;
+  const { data: rows, error } = await db
+    .from('work_logs').select('date')
+    .gte('date', start).lte('date', end)
+    .order('date', {ascending: true});
 
-  if (currentProfile) {
-    const left = trialDaysLeft(currentProfile);
-    const el2 = document.getElementById('sub-trial-info');
-    if (el2) el2.textContent = left > 0 ? `${left} days remaining in your free trial` : 'Your trial has ended.';
+  if (error) { showToast('Failed to load data'); return; }
+
+  const count  = rows.length;
+  const earned = count * DAY_RATE;
+
+  const now = new Date();
+  const isNow = y === now.getFullYear() && m === now.getMonth();
+  document.getElementById('earn-lbl').textContent =
+    isNow ? 'Earned so far this month' : 'Total earned this month';
+  document.getElementById('earn-amt').textContent    = fmtAUD(earned);
+  document.getElementById('earn-detail').textContent =
+    `${count} day${count !== 1 ? 's' : ''} \u00d7 $${DAY_RATE}/day`;
+
+  const list = document.getElementById('janine-list');
+  if (count === 0) {
+    list.innerHTML = '<div class="empty">No days worked this month.</div>';
+    return;
   }
+  list.innerHTML = rows.map(r => `
+    <div class="day-row">
+      <div class="dot"></div>
+      <span>${fmtDate(r.date)}</span>
+    </div>`).join('');
 }
 
-async function notifyPricing() {
-  showToast("We'll email you when pricing is live!", 'success');
+function printStatement() {
+  window.print();
 }
 
-// ===== PAYWALL =====
-async function renderPaywall(el) {
-  if (!currentProfile) currentProfile = await loadProfile(currentUser.id);
-  const canExtend = !currentProfile.trial_extended;
-
-  el.innerHTML = `
-    <div class="paywall-center">
-      <div class="paywall-icon">⏰</div>
-      <h2 style="font-size:28px;margin-bottom:10px">Your free trial has ended</h2>
-      <p class="text-muted mb-24" style="max-width:360px">Upgrade to keep tracking days and sending invoices.</p>
-      <a href="#/subscription" class="btn btn-primary" style="margin-bottom:12px">View subscription options</a>
-      ${canExtend ? `<button class="btn btn-ghost" id="extend-btn" onclick="extendTrial()">Extend my trial by 7 days</button>` : ''}
-      <p class="text-sm text-muted mt-24">Questions? <a href="mailto:support@paddockpay.com.au">support@paddockpay.com.au</a></p>
-      <button class="btn btn-ghost btn-sm mt-12" onclick="authSignOut()">Log out</button>
-    </div>
-  `;
-}
-
-async function extendTrial() {
-  if (currentProfile.trial_extended) { showToast('Trial extension already used', 'error'); return; }
-  const btn = document.getElementById('extend-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner spinner-sm"></div>'; }
-  const newEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-  await db.from('profiles').update({ trial_extended: true, trial_ends_at: newEnd, subscription_status: 'trial' }).eq('id', currentUser.id);
-  currentProfile.trial_extended = true;
-  currentProfile.trial_ends_at = newEnd;
-  currentProfile.subscription_status = 'trial';
-  showToast('Trial extended by 7 days!', 'success');
-  navigate('/dashboard');
-}
-
-// ===== INIT =====
-function init() {
-  // Register service worker — fire and forget
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/paddockpay/sw.js').catch(() => {});
-  }
-
-  // Read session from localStorage synchronously — ZERO network, ZERO blocking
-  // Supabase v2 stores session under this key
-  try {
-    const raw = localStorage.getItem('sb-qfuffybirntwooanvtte-auth-token');
-    if (raw) {
-      const stored = JSON.parse(raw);
-      if (stored && stored.user) {
-        currentUser = stored.user;
-      }
-    }
-  } catch(e) {}
-
-  // Show app immediately — no waiting
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-
-  // Route based on what we know right now
-  router();
-
-  // Handle Xero callback params
-  const hash = window.location.hash;
-  if (hash.includes('xero=connected')) {
-    showToast('Xero connected successfully!', 'success');
-  } else if (hash.includes('xero=error')) {
-    showToast('Xero connection failed. Please try again.', 'error');
-  }
-
-  // Background: open IndexedDB (never blocks startup)
-  openIDB().then(() => {
-    updatePendingCount();
-    if (navigator.onLine && currentUser) flushQueue();
-  }).catch(() => {});
-
-  // Background: verify session with Supabase (refreshes token if needed)
-  // This runs AFTER the page is already showing
-  db.auth.getSession().then(({ data: { session } }) => {
-    const wasLoggedIn = !!currentUser;
-    currentUser = session?.user || null;
-    if (currentUser) {
-      loadProfile(currentUser.id).then(p => {
-        currentProfile = p;
-        updateSyncUI();
-        // If we weren't logged in before (localStorage was empty), re-route now
-        if (!wasLoggedIn) router();
-      }).catch(() => {});
-    } else if (wasLoggedIn) {
-      // Session expired — re-route to login
-      currentProfile = null;
-      router();
-    }
-  }).catch(() => {
-    // Supabase unreachable — keep whatever we got from localStorage
-  });
-
-  // Listen for auth changes (sign in / sign out events)
-  db.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN') {
-      currentUser = session.user;
-      try { currentProfile = await loadProfile(session.user.id); } catch(e) {}
-      updateSyncUI();
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      currentProfile = null;
-      updateSyncUI();
-    }
-  });
-}
-
-init();
+// ── START ─────────────────────────────────────────────────
+const startHash = window.location.hash;
+if (startHash.includes('janine')) gotoView('janine');
+else gotoView('josh');
 </script>
 </body>
 </html>
