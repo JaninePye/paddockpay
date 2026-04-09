@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PaddockPay</title>
   <link rel="icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -806,6 +807,10 @@ const h = window.location.hash;
 if (h.includes('janine'))   gotoView('janine');
 else if (h.includes('cal')) gotoView('calendar');
 else                         gotoView('josh');
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/paddockpay/sw.js');
+}
 </script>
 </body>
 </html>
