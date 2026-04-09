@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PaddockPay</title>
+  <link rel="icon" href="favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -186,60 +187,6 @@
     }
     .day-row span { font-size: 14px; }
 
-    /* ── PIN SCREEN ── */
-    .pin-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - 60px);
-      padding: 20px;
-    }
-    .pin-icon { font-size: 40px; margin-bottom: 16px; }
-    .pin-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-    .pin-sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; text-align: center; }
-    .pin-input {
-      width: 180px;
-      padding: 14px;
-      border-radius: 12px;
-      border: 2px solid var(--border);
-      background: var(--card);
-      color: var(--fg);
-      font-family: 'DM Mono', monospace;
-      font-size: 28px;
-      text-align: center;
-      letter-spacing: 8px;
-      outline: none;
-      margin-bottom: 16px;
-      transition: border-color 0.15s;
-      -webkit-text-security: disc;
-    }
-    .pin-input:focus { border-color: var(--wheat); }
-    .pin-input.shake { animation: shake 0.35s ease; border-color: var(--red); }
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      20%,60%  { transform: translateX(-8px); }
-      40%,80%  { transform: translateX(8px); }
-    }
-    .pin-btn {
-      width: 180px;
-      padding: 13px;
-      border-radius: 12px;
-      border: none;
-      background: var(--wheat);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .pin-btn:hover { background: var(--wheat2); }
-
     /* ── JANINE DASHBOARD ── */
     .month-nav {
       display: flex;
@@ -420,19 +367,6 @@
 </div>
 
 <!-- ══ JANINE — PIN GATE ══ -->
-<div class="screen" id="screen-pin">
-  <div class="pin-wrap">
-    <div class="pin-icon">🔐</div>
-    <div class="pin-title">Janine's Dashboard</div>
-    <p class="pin-sub">Enter your PIN to view statements<br>and earnings history.</p>
-    <input type="password" inputmode="numeric" maxlength="6"
-           class="pin-input" id="pin-input"
-           placeholder="••••"
-           onkeydown="if(event.key==='Enter')checkPin()">
-    <button class="pin-btn" onclick="checkPin()">Unlock</button>
-  </div>
-</div>
-
 <!-- ══ JANINE — DASHBOARD ══ -->
 <div class="screen" id="screen-janine">
 
@@ -445,7 +379,7 @@
   <div class="month-nav">
     <button class="mnav-btn" onclick="changeMonth(-1)">&#8592;</button>
     <div class="month-label" id="month-lbl"></div>
-    <button class="mnav-btn" onclick="changeMonth(1)">&#8594;</button>
+    <button class="mnav-btn" id="btn-next-month" onclick="changeMonth(1)">&#8594;</button>
   </div>
 
   <div class="earn-card">
@@ -469,8 +403,7 @@
 // ── CONFIG ────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://qfuffybirntwooanvtte.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmdWZmeWJpcm50d29vYW52dHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5NTEwMDYsImV4cCI6MjA1OTUyNzAwNn0.UeNVJNqjGLDmAR0rnVjBFcmRj8r8rH_eicXz1IIQQ2g';
-const DAY_RATE      = 350;
-const JANINE_PIN    = '2606';   // ← change this to whatever PIN Janine wants
+const DAY_RATE = 350;
 
 // ── INIT ──────────────────────────────────────────────────
 const { createClient } = supabase;
@@ -518,22 +451,6 @@ function gotoView(view) {
     loadJosh();
   }
   history.replaceState(null,'','#/' + view);
-}
-
-// ── PIN ───────────────────────────────────────────────────
-function checkPin() {
-  const val = document.getElementById('pin-input').value;
-  if (val === JANINE_PIN) {
-    sessionStorage.setItem('pp_auth', '1');
-    document.getElementById('pin-input').value = '';
-    gotoView('janine');
-  } else {
-    const inp = document.getElementById('pin-input');
-    inp.classList.add('shake');
-    inp.value = '';
-    setTimeout(() => inp.classList.remove('shake'), 400);
-    showToast('Incorrect PIN — try again');
-  }
 }
 
 // ── JOSH ──────────────────────────────────────────────────
@@ -620,7 +537,12 @@ async function undoToday() {
 
 // ── JANINE ────────────────────────────────────────────────
 function changeMonth(dir) {
-  curMonth.setMonth(curMonth.getMonth() + dir);
+  const next = new Date(curMonth);
+  next.setMonth(next.getMonth() + dir);
+  const now = new Date();
+  if (next.getFullYear() > now.getFullYear() ||
+     (next.getFullYear() === now.getFullYear() && next.getMonth() > now.getMonth())) return;
+  curMonth = next;
   loadJanine();
 }
 
@@ -652,6 +574,9 @@ async function loadJanine() {
 
   const now = new Date();
   const isNow = y === now.getFullYear() && m === now.getMonth();
+  // Disable → when already on current month
+  document.getElementById('btn-next-month').style.opacity = isNow ? '0.3' : '1';
+  document.getElementById('btn-next-month').style.pointerEvents = isNow ? 'none' : 'auto';
   document.getElementById('earn-lbl').textContent =
     isNow ? 'Earned so far this month' : 'Total earned this month';
   document.getElementById('earn-amt').textContent = fmtAUD(earned);
