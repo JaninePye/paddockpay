@@ -478,14 +478,8 @@ function gotoView(view) {
   document.getElementById('tab-' + view).classList.add('on');
 
   if (view === 'janine') {
-    // Check session PIN
-    if (sessionStorage.getItem('pp_auth') === '1') {
-      document.getElementById('screen-janine').classList.add('on');
-      loadJanine();
-    } else {
-      document.getElementById('screen-pin').classList.add('on');
-      setTimeout(() => document.getElementById('pin-input').focus(), 100);
-    }
+    document.getElementById('screen-janine').classList.add('on');
+    loadJanine();
   } else {
     document.getElementById('screen-josh').classList.add('on');
     loadJosh();
