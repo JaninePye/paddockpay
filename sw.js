@@ -1,4 +1,4 @@
-const CACHE = 'paddockpay-v3';
+const CACHE = 'paddockpay-v4';
 const STATIC = [
   '/paddockpay/',
   '/paddockpay/index.html',
@@ -6,17 +6,12 @@ const STATIC = [
   '/paddockpay/icons/icon-192.png',
   '/paddockpay/icons/icon-512.png'
 ];
-// supabase.js is large (187KB) — cached opportunistically on first fetch, not at install time
 
-// Install: cache static assets
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
   self.skipWaiting();
 });
 
-// Activate: delete old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -26,29 +21,16 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: network first, cache fallback for static; never cache API calls
 self.addEventListener('fetch', e => {
-  const url = e.request.url;
-
-  // Never cache Supabase API or external CDN requests
-  if (
-    url.includes('supabase.co') ||
-    url.includes('googleapis.com') ||
-    url.includes('gstatic.com') ||
-    url.includes('jsdelivr.net')
-  ) {
-    return; // Let browser handle normally
-  }
-
+  if (e.request.url.includes('supabase.co')) return; // never cache API calls
   e.respondWith(
     fetch(e.request)
-      .then(response => {
-        // Cache successful GET responses
-        if (e.request.method === 'GET' && response.status === 200) {
-          const clone = response.clone();
+      .then(res => {
+        if (e.request.method === 'GET' && res.status === 200) {
+          const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
-        return response;
+        return res;
       })
       .catch(() => caches.match(e.request))
   );
