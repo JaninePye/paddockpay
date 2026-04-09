@@ -1,7 +1,7 @@
 {
   "name": "PaddockPay",
   "short_name": "PaddockPay",
-  "description": "Labour tracking and invoicing for agricultural contractors",
+  "description": "Day tracking for Josh and Janine",
   "start_url": "/paddockpay/",
   "scope": "/paddockpay/",
   "display": "standalone",
