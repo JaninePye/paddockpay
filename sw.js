@@ -1,7 +1,8 @@
-const CACHE = 'paddockpay-v1';
+const CACHE = 'paddockpay-v2';
 const STATIC = [
   '/paddockpay/',
   '/paddockpay/index.html',
+  '/paddockpay/supabase.js',
   '/paddockpay/manifest.json',
   '/paddockpay/icons/icon-192.png',
   '/paddockpay/icons/icon-512.png'
