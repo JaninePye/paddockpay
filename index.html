@@ -1182,11 +1182,11 @@ function renderSignup(el) {
       <form id="signup-form">
         <div class="form-group">
           <label class="form-label">Full name</label>
-          <input type="text" id="su-name" class="form-input" placeholder="Janine Pye" autocomplete="name" required>
+          <input type="text" id="su-name" class="form-input" placeholder="Sarah Mitchell" autocomplete="name" required>
         </div>
         <div class="form-group">
           <label class="form-label">Email address</label>
-          <input type="email" id="su-email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+          <input type="email" id="su-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
@@ -1222,7 +1222,7 @@ function renderSignup(el) {
 
         <div class="form-group" id="biz-name-group">
           <label class="form-label">Business name <span class="text-muted">(optional)</span></label>
-          <input type="text" id="su-biz" class="form-input" placeholder="Pye Agricultural Services">
+          <input type="text" id="su-biz" class="form-input" placeholder="Mitchell Ag Services">
         </div>
 
         <div class="form-group">
@@ -1331,7 +1331,7 @@ function renderLogin(el) {
       <form id="login-form">
         <div class="form-group">
           <label class="form-label">Email address</label>
-          <input type="email" id="li-email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+          <input type="email" id="li-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
@@ -1397,7 +1397,7 @@ function renderForgotPassword(el) {
       <form id="forgot-form" id="forgot-form">
         <div class="form-group">
           <label class="form-label">Email address</label>
-          <input type="email" id="fp-email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+          <input type="email" id="fp-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
         </div>
         <div id="forgot-success" class="banner banner-info hidden" style="margin-bottom:16px">
           Check your email for a reset link.
@@ -1544,7 +1544,7 @@ function renderOnboardingStep(el) {
       <form id="ob1-form">
         <div class="form-group">
           <label class="form-label">Business name <span class="text-muted">(optional)</span></label>
-          <input type="text" id="ob-biz" class="form-input" placeholder="Pye Agricultural Services" value="${sanitize(currentProfile?.business_name || '')}">
+          <input type="text" id="ob-biz" class="form-input" placeholder="Mitchell Ag Services" value="${sanitize(currentProfile?.business_name || '')}">
         </div>
         <div class="form-group">
           <label class="form-label">ABN <span class="text-muted">(optional)</span></label>
@@ -1559,7 +1559,7 @@ function renderOnboardingStep(el) {
       <form id="ob2-form">
         <div class="form-group">
           <label class="form-label">Worker email</label>
-          <input type="email" id="ob-email" class="form-input" placeholder="worker@example.com" required>
+          <input type="email" id="ob-email" class="form-input" placeholder="worker@gmail.com" required>
         </div>
         <div class="form-group">
           <label class="form-label">Day rate (AUD)</label>
@@ -1784,7 +1784,7 @@ async function renderAdminDashboard(el) {
       <form id="invite-form">
         <div class="form-group">
           <label class="form-label">Worker email</label>
-          <input type="email" id="inv-email" class="form-input" placeholder="worker@example.com" required>
+          <input type="email" id="inv-email" class="form-input" placeholder="worker@gmail.com" required>
         </div>
         <div class="form-group">
           <label class="form-label">Day rate (AUD)</label>
@@ -2233,7 +2233,7 @@ async function renderWorkers(el) {
       <div class="sheet-handle"></div>
       <div class="sheet-title">Invite a worker</div>
       <form id="wi-form">
-        <div class="form-group"><label class="form-label">Worker email</label><input type="email" id="wi-email" class="form-input" placeholder="worker@example.com" required></div>
+        <div class="form-group"><label class="form-label">Worker email</label><input type="email" id="wi-email" class="form-input" placeholder="worker@gmail.com" required></div>
         <div class="form-group"><label class="form-label">Day rate (AUD)</label><input type="number" id="wi-rate" class="form-input" placeholder="350.00" min="1" step="0.01" required></div>
         <div id="wi-error" class="form-error hidden mb-8"></div>
         <button type="submit" class="btn btn-primary btn-full" id="wi-btn">Send invitation</button>
@@ -2615,7 +2615,7 @@ async function renderSettings(el, params) {
         <form id="notif-form">
           <div class="form-group">
             <label class="form-label">Statement CC email <span class="text-muted">(optional)</span></label>
-            <input type="email" id="s-cc" class="form-input" placeholder="accountant@example.com" value="${sanitize(currentProfile.statement_cc_email||'')}">
+            <input type="email" id="s-cc" class="form-input" placeholder="accountant@gmail.com" value="${sanitize(currentProfile.statement_cc_email||'')}">
             <div class="form-hint">A copy of each statement email will be sent here.</div>
           </div>
           <div class="card">
