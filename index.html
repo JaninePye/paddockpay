@@ -15,14 +15,14 @@
       --border: #3D2210;
       --wheat:  #D4A843;
       --wheat2: #B88A30;
+      --wheat-dim: rgba(212,168,67,0.18);
       --fg:     #F2E4C4;
       --muted:  #7A6248;
       --green:  #4E9A5A;
       --red:    #C0392B;
+      --half:   rgba(212,168,67,0.45);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: var(--bg);
       color: var(--fg);
@@ -33,282 +33,242 @@
 
     /* ── HEADER ── */
     .hdr {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 14px 20px;
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 10;
+      position: sticky; top: 0; background: var(--bg); z-index: 20;
     }
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      color: var(--wheat);
-      letter-spacing: 0.5px;
-    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--wheat); }
     .tabs {
-      display: flex;
-      background: var(--card);
-      border-radius: 10px;
-      padding: 3px;
-      gap: 2px;
+      display: flex; background: var(--card);
+      border-radius: 10px; padding: 3px; gap: 2px;
       border: 1px solid var(--border);
     }
     .tab {
-      padding: 7px 18px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.15s;
+      padding: 7px 14px; border-radius: 8px; border: none;
+      background: transparent; color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      cursor: pointer; transition: all 0.15s;
     }
     .tab.on { background: var(--wheat); color: var(--bg); font-weight: 500; }
 
     /* ── SCREENS ── */
-    .screen { display: none; max-width: 440px; margin: 0 auto; padding: 28px 20px 60px; }
+    .screen { display: none; max-width: 440px; margin: 0 auto; padding: 28px 20px 100px; }
     .screen.on { display: block; }
 
-    /* ── JOSH SCREEN ── */
-    .date-block { text-align: center; margin-bottom: 36px; }
-    .date-weekday {
-      font-size: 12px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 6px;
+    /* ── SHARED COMPONENTS ── */
+    .sec-label {
+      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
     }
-    .date-full {
-      font-family: 'Playfair Display', serif;
-      font-size: 30px;
-      color: var(--fg);
+    .day-list { display: flex; flex-direction: column; gap: 6px; }
+    .day-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 16px; background: var(--card);
+      border-radius: 12px; border: 1px solid var(--border);
     }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--wheat); flex-shrink: 0; }
+    .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 14px; }
+    .spinner {
+      width: 22px; height: 22px; border: 2px solid var(--border);
+      border-top-color: var(--wheat); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .day-btns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
+    /* ── JOSH ── */
+    .date-block { text-align: center; margin-bottom: 36px; }
+    .date-weekday { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .date-full { font-family: 'Playfair Display', serif; font-size: 30px; }
+    .day-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
     .big-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 28px 16px;
-      border-radius: 20px;
-      border: 2px solid var(--wheat);
-      background: transparent;
-      color: var(--wheat);
-      font-family: 'DM Mono', monospace;
-      cursor: pointer;
-      transition: all 0.18s;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 8px; width: 100%;
+      padding: 28px 16px; border-radius: 20px;
+      border: 2px solid var(--wheat); background: transparent;
+      color: var(--wheat); cursor: pointer; transition: all 0.18s;
     }
-    .big-btn .btn-icon { font-size: 28px; line-height: 1; }
+    .big-btn .btn-icon  { font-size: 28px; line-height: 1; }
     .big-btn .btn-label { font-family: 'Playfair Display', serif; font-size: 17px; }
     .big-btn .btn-rate  { font-size: 12px; color: var(--muted); }
     .big-btn:hover:not(:disabled) {
-      background: var(--wheat);
-      color: var(--bg);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(212,168,67,0.2);
+      background: var(--wheat); color: var(--bg);
+      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,168,67,0.2);
     }
     .big-btn:hover:not(:disabled) .btn-rate { color: var(--bg); opacity: 0.7; }
     .big-btn:active:not(:disabled) { transform: translateY(0); }
-    .big-btn.done {
-      background: var(--green);
-      border-color: var(--green);
-      color: #fff;
-      cursor: default;
-    }
+    .big-btn.done { background: var(--green); border-color: var(--green); color: #fff; cursor: default; }
     .big-btn.done .btn-rate { color: rgba(255,255,255,0.7); }
     .big-btn.done:hover { transform: none; box-shadow: none; }
-
     .logged-badge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 20px;
-      border-radius: 20px;
-      background: var(--green);
-      color: #fff;
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 20px; border-radius: 20px; background: var(--green);
+      color: #fff; font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 8px;
     }
     .undo-btn {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      cursor: pointer;
-      text-align: center;
-      margin-bottom: 28px;
+      display: block; width: 100%; padding: 10px; background: transparent;
+      border: none; color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 12px; cursor: pointer; text-align: center; margin-bottom: 28px;
       transition: color 0.15s;
     }
     .undo-btn:hover { color: var(--red); }
 
-    .sec-label {
-      font-size: 11px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-
-    .day-list { display: flex; flex-direction: column; gap: 6px; }
-    .day-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 16px;
-      background: var(--card);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--wheat);
-      opacity: 0.7;
-      flex-shrink: 0;
-    }
-    .day-row span { font-size: 14px; }
-
-    /* ── JANINE DASHBOARD ── */
-    .month-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* ── CALENDAR ── */
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 20px;
     }
-    .mnav-btn {
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--fg);
-      font-size: 16px;
-      cursor: pointer;
+    .cal-nav-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--fg); font-size: 16px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.15s;
     }
-    .mnav-btn:hover { border-color: var(--wheat); color: var(--wheat); }
-    .month-label {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
+    .cal-nav-btn:hover { border-color: var(--wheat); color: var(--wheat); }
+    .cal-nav-btn:disabled { opacity: 0.3; pointer-events: none; }
+    .cal-month-lbl { font-family: 'Playfair Display', serif; font-size: 22px; }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px; margin-bottom: 16px;
+    }
+    .cal-dow {
+      text-align: center; font-size: 10px; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted);
+      padding: 6px 0;
+    }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 10px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; font-size: 13px; position: relative;
+      border: 1.5px solid transparent; transition: all 0.12s;
+      gap: 2px;
+    }
+    .cal-day:hover:not(.cal-empty):not(.cal-future) { border-color: var(--wheat); }
+    .cal-day.cal-empty { cursor: default; }
+    .cal-day.cal-future { opacity: 0.25; cursor: default; }
+    .cal-day.cal-today { border-color: var(--fg) !important; }
+    .cal-day.cal-full  { background: var(--wheat); color: var(--bg); font-weight: 600; }
+    .cal-day.cal-half  { background: var(--half); color: var(--wheat); font-weight: 600; }
+    .cal-day.cal-full .cal-pip, .cal-day.cal-half .cal-pip { display: block; }
+    .cal-pip { display: none; font-size: 8px; line-height: 1; }
+    .cal-hint { text-align: center; font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+    .cal-legend {
+      display: flex; gap: 16px; justify-content: center;
+      font-size: 12px; color: var(--muted); margin-bottom: 0;
+    }
+    .cal-legend-item { display: flex; align-items: center; gap: 6px; }
+    .cal-legend-dot {
+      width: 12px; height: 12px; border-radius: 4px;
     }
 
+    /* ── DAY SHEET (bottom popup) ── */
+    .sheet-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .sheet-backdrop.on { opacity: 1; pointer-events: all; }
+    .sheet {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--card2); border-top: 1px solid var(--border);
+      border-radius: 20px 20px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom) + 20px);
+      z-index: 31; transform: translateY(100%); transition: transform 0.25s ease;
+      max-width: 480px; margin: 0 auto;
+    }
+    .sheet.on { transform: translateY(0); }
+    .sheet-title {
+      font-family: 'Playfair Display', serif; font-size: 18px;
+      text-align: center; margin-bottom: 4px;
+    }
+    .sheet-sub { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 20px; }
+    .sheet-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .sheet-btn {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; padding: 18px 12px; border-radius: 14px;
+      border: 2px solid var(--wheat); background: transparent;
+      color: var(--wheat); cursor: pointer; font-family: 'DM Mono', monospace;
+      transition: all 0.15s;
+    }
+    .sheet-btn .s-icon  { font-size: 24px; }
+    .sheet-btn .s-label { font-family: 'Playfair Display', serif; font-size: 16px; }
+    .sheet-btn .s-rate  { font-size: 12px; color: var(--muted); }
+    .sheet-btn:hover { background: var(--wheat); color: var(--bg); }
+    .sheet-btn:hover .s-rate { color: var(--bg); opacity: 0.7; }
+    .sheet-remove {
+      width: 100%; padding: 12px; border-radius: 12px;
+      border: 1px solid var(--red); background: transparent;
+      color: var(--red); font-family: 'DM Mono', monospace;
+      font-size: 13px; cursor: pointer; transition: all 0.15s;
+    }
+    .sheet-remove:hover { background: var(--red); color: #fff; }
+    .sheet-cancel {
+      width: 100%; padding: 10px; border: none; background: transparent;
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 12px; cursor: pointer; margin-top: 4px;
+    }
+
+    /* ── JANINE ── */
+    .month-nav {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    }
+    .mnav-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--fg); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .mnav-btn:hover { border-color: var(--wheat); color: var(--wheat); }
+    .month-label { font-family: 'Playfair Display', serif; font-size: 22px; }
     .earn-card {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 28px 24px;
-      margin-bottom: 20px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 18px; padding: 28px 24px; margin-bottom: 20px;
+      text-align: center; position: relative; overflow: hidden;
     }
     .earn-card::before {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 120px; height: 120px;
-      border-radius: 50%;
+      content: ''; position: absolute; top: -40px; right: -40px;
+      width: 120px; height: 120px; border-radius: 50%;
       background: radial-gradient(circle, rgba(212,168,67,0.12) 0%, transparent 70%);
       pointer-events: none;
     }
-    .earn-lbl {
-      font-size: 11px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    .earn-amt {
-      font-family: 'Playfair Display', serif;
-      font-size: 52px;
-      color: var(--wheat);
-      line-height: 1;
-      margin-bottom: 8px;
-    }
+    .earn-lbl { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .earn-amt { font-family: 'Playfair Display', serif; font-size: 52px; color: var(--wheat); line-height: 1; margin-bottom: 8px; }
     .earn-detail { font-size: 13px; color: var(--muted); }
-
     .dl-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 15px;
-      border-radius: 13px;
-      border: none;
-      background: var(--wheat);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      margin-bottom: 24px;
-      transition: background 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 15px; border-radius: 13px; border: none;
+      background: var(--wheat); color: var(--bg);
+      font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500;
+      cursor: pointer; margin-bottom: 24px; transition: background 0.15s, transform 0.1s;
     }
     .dl-btn:hover { background: var(--wheat2); transform: translateY(-1px); }
-    .dl-btn:active { transform: translateY(0); }
-
-    /* ── SHARED ── */
-    .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 14px; }
-    .spinner {
-      width: 22px; height: 22px;
-      border: 2px solid var(--border);
-      border-top-color: var(--wheat);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin: 40px auto;
+    .retro-note {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+      font-size: 12px; color: var(--muted); line-height: 1.6;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .retro-note strong { color: var(--wheat); }
 
+    /* ── TOAST ── */
     .toast {
       position: fixed;
-      bottom: env(safe-area-inset-bottom, 24px);
       bottom: calc(env(safe-area-inset-bottom) + 24px);
-      left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      background: var(--card2);
-      color: var(--fg);
-      padding: 12px 22px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      font-size: 13px;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      pointer-events: none;
-      z-index: 100;
-      white-space: nowrap;
+      left: 50%; transform: translateX(-50%) translateY(16px);
+      background: var(--card2); color: var(--fg);
+      padding: 12px 22px; border-radius: 12px;
+      border: 1px solid var(--border); font-size: 13px;
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none; z-index: 100;
+      max-width: calc(100vw - 40px); text-align: center;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── PRINT ── */
     @media print {
       body { background: #fff; color: #111; font-family: Georgia, serif; }
-      .hdr, .tabs, .month-nav, .dl-btn, .undo-btn { display: none !important; }
+      .hdr, .tabs, .month-nav, .dl-btn { display: none !important; }
       .screen { padding: 0; max-width: 100%; }
-      .earn-card {
-        background: #f7f7f7;
-        border-color: #ddd;
-        break-inside: avoid;
-      }
+      .earn-card { background: #f7f7f7; border-color: #ddd; break-inside: avoid; }
       .earn-card::before { display: none; }
       .earn-amt { color: #333; font-size: 40px; }
       .earn-lbl, .earn-detail { color: #666; }
@@ -316,14 +276,10 @@
       .day-row span { color: #111; }
       .dot { background: #555; }
       .sec-label { color: #666; }
+      .retro-note { background: #f7f7f7; border-color: #ddd; color: #555; }
       .print-hdr { display: block !important; }
     }
-    .print-hdr {
-      display: none;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #333;
-    }
+    .print-hdr { display: none; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #333; }
     .print-hdr h1 { font-size: 26px; margin-bottom: 4px; }
     .print-hdr p  { font-size: 14px; color: #555; }
   </style>
@@ -333,18 +289,18 @@
 <header class="hdr">
   <span class="logo">PaddockPay</span>
   <div class="tabs">
-    <button class="tab" id="tab-josh"   onclick="gotoView('josh')">Josh</button>
-    <button class="tab" id="tab-janine" onclick="gotoView('janine')">Janine</button>
+    <button class="tab" id="tab-josh"     onclick="gotoView('josh')">Josh</button>
+    <button class="tab" id="tab-calendar" onclick="gotoView('calendar')">Calendar</button>
+    <button class="tab" id="tab-janine"   onclick="gotoView('janine')">Janine</button>
   </div>
 </header>
 
-<!-- ══ JOSH SCREEN ══ -->
+<!-- ══ JOSH ══ -->
 <div class="screen" id="screen-josh">
   <div class="date-block">
     <div class="date-weekday" id="j-weekday"></div>
     <div class="date-full"    id="j-date"></div>
   </div>
-
   <div class="day-btns" id="log-btns">
     <button class="big-btn" id="btn-full" onclick="logToday('full')">
       <span class="btn-icon">☀️</span>
@@ -361,57 +317,138 @@
     <div class="logged-badge" id="logged-badge"></div>
     <button class="undo-btn" onclick="undoToday()">↩ Undo today's entry</button>
   </div>
-
   <div class="sec-label">Recent days worked</div>
   <div class="day-list" id="josh-list"><div class="spinner"></div></div>
 </div>
 
-<!-- ══ JANINE — PIN GATE ══ -->
-<!-- ══ JANINE — DASHBOARD ══ -->
-<div class="screen" id="screen-janine">
+<!-- ══ CALENDAR ══ -->
+<div class="screen" id="screen-calendar">
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="calPrev()">&#8592;</button>
+    <div class="cal-month-lbl" id="cal-month-lbl"></div>
+    <button class="cal-nav-btn" id="cal-next-btn" onclick="calNext()">&#8594;</button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <p class="cal-hint">Tap any past day to log or remove it</p>
+  <div class="cal-legend">
+    <div class="cal-legend-item">
+      <div class="cal-legend-dot" style="background:var(--wheat)"></div> Full day
+    </div>
+    <div class="cal-legend-item">
+      <div class="cal-legend-dot" style="background:var(--half)"></div> Half day
+    </div>
+  </div>
+</div>
 
-  <!-- Hidden print header -->
-  <div class="print-hdr" id="print-hdr">
+<!-- ══ JANINE ══ -->
+<div class="screen" id="screen-janine">
+  <div class="print-hdr">
     <h1>PaddockPay — Work Statement</h1>
     <p id="print-sub"></p>
   </div>
-
   <div class="month-nav">
     <button class="mnav-btn" onclick="changeMonth(-1)">&#8592;</button>
     <div class="month-label" id="month-lbl"></div>
     <button class="mnav-btn" id="btn-next-month" onclick="changeMonth(1)">&#8594;</button>
   </div>
-
   <div class="earn-card">
-    <div class="earn-lbl" id="earn-lbl">Total earned</div>
-    <div class="earn-amt" id="earn-amt">$0</div>
+    <div class="earn-lbl"    id="earn-lbl">Total earned</div>
+    <div class="earn-amt"    id="earn-amt">$0</div>
     <div class="earn-detail" id="earn-detail">0 days &times; $350/day</div>
   </div>
-
-  <button class="dl-btn" onclick="printStatement()">
-    &#8595;&nbsp; Download / Print Statement
-  </button>
-
+  <button class="dl-btn" onclick="window.print()">&#8595;&nbsp; Download / Print Statement</button>
+  <div id="retro-note-wrap"></div>
   <div class="sec-label">Days worked</div>
   <div class="day-list" id="janine-list"><div class="spinner"></div></div>
+</div>
+
+<!-- ══ DAY SHEET ══ -->
+<div class="sheet-backdrop" id="backdrop" onclick="closeSheet()"></div>
+<div class="sheet" id="day-sheet">
+  <div class="sheet-title" id="sheet-title"></div>
+  <div class="sheet-sub"   id="sheet-sub"></div>
+  <div class="sheet-btns" id="sheet-log-btns">
+    <button class="sheet-btn" onclick="sheetLog('full')">
+      <span class="s-icon">☀️</span>
+      <span class="s-label">Full Day</span>
+      <span class="s-rate">$350</span>
+    </button>
+    <button class="sheet-btn" onclick="sheetLog('half')">
+      <span class="s-icon">⛅</span>
+      <span class="s-label">Half Day</span>
+      <span class="s-rate">$175</span>
+    </button>
+  </div>
+  <button class="sheet-remove" id="sheet-remove-btn" onclick="sheetRemove()" style="display:none">
+    Remove this day
+  </button>
+  <button class="sheet-cancel" onclick="closeSheet()">Cancel</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script src="supabase.js"></script>
 <script>
-// ── CONFIG ────────────────────────────────────────────────
+// ── CONFIG ─────────────────────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://qfuffybirntwooanvtte.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmdWZmeWJpcm50d29vYW52dHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5NTEwMDYsImV4cCI6MjA1OTUyNzAwNn0.UeNVJNqjGLDmAR0rnVjBFcmRj8r8rH_eicXz1IIQQ2g';
 const DAY_RATE = 350;
 
-// ── INIT ──────────────────────────────────────────────────
+// ── FARM JOKES ──────────────────────────────────────────────────────────────
+const JOKES = {
+  full: [
+    "Beauty! Another full day in the paddock! 🐄",
+    "That's what I call a hard day's yakka! 🚜",
+    "Full day logged — the cows are proud of ya! 🐮",
+    "Ripper! Full day down, cold beer well earned! 🍺",
+    "She's all good, mate — full day in the books! 📒",
+  ],
+  half: [
+    "Half a day's better than a kick from a bull! 🐂",
+    "Gone by smoko — she'll be right! ☕",
+    "Half day logged. The sheep won't judge ya! 🐑",
+    "Short day, long paddock — fair enough! 🌾",
+    "Half a loaf is better than none, especially on the farm! 🍞",
+  ],
+  removed: [
+    "Gone like a sheep through a fence! 🐑",
+    "Mustered right out of the records! 🐄",
+    "Even farmers make mistakes, mate! 🤠",
+    "Back to the shed it goes! 🏚",
+    "Cleared out faster than a chook from a hawk! 🐔",
+  ],
+  undo: [
+    "Back in the shed where it belongs! 🏚",
+    "Undone faster than a gate latch! 🚪",
+    "Right-o, back to square one! 🐄",
+  ],
+  error: [
+    "Crikey! The cattle grid's blocked — check your signal 🚜",
+    "Something's spooked the horses — try again! 🐴",
+    "No good, mate — the paddock's offline 📡",
+    "Strewth! The WiFi's gone walkabout 🦘",
+  ],
+  duplicate: [
+    "Easy there, cowboy — already got that one! 🤠",
+    "Steady on — that day's already in the yard! 🐄",
+    "Looks like someone beat ya to it! 🐓",
+  ],
+};
+function joke(type) {
+  const arr = JOKES[type] || JOKES.error;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let curMonth = new Date();
-curMonth.setDate(1);
+let curMonth    = new Date(); curMonth.setDate(1);
+let calMonth    = new Date(); calMonth.setDate(1);
+let calLogs     = {};   // { 'YYYY-MM-DD': 'full'|'half' }
+let sheetDate   = null; // currently open sheet's date
 
+// ── UTILITIES ───────────────────────────────────────────────────────────────
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -423,37 +460,45 @@ function fmtDate(iso) {
   return new Date(y,m-1,d).toLocaleDateString('en-AU',
     {weekday:'short', day:'numeric', month:'short', year:'numeric'});
 }
+function fmtDateLong(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString('en-AU',
+    {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
 function fmtMonth(dt) {
   return dt.toLocaleDateString('en-AU', {month:'long', year:'numeric'});
 }
-function fmtAUD(n) {
-  return '$' + n.toLocaleString('en-AU');
+function fmtAUD(n) { return '$' + n.toLocaleString('en-AU'); }
+
+function isRetro(row) {
+  // Was this entry added after the month it belongs to had already closed?
+  const [y,m] = row.date.split('-').map(Number);
+  const monthEnd = new Date(y, m, 0, 23, 59, 59); // last moment of that month
+  return new Date(row.created_at) > monthEnd;
 }
 
+let _toastTimer;
 function showToast(msg) {
+  clearTimeout(_toastTimer);
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-// ── ROUTING ───────────────────────────────────────────────
+// ── ROUTING ─────────────────────────────────────────────────────────────────
 function gotoView(view) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
   document.getElementById('tab-' + view).classList.add('on');
-
-  if (view === 'janine') {
-    document.getElementById('screen-janine').classList.add('on');
-    loadJanine();
-  } else {
-    document.getElementById('screen-josh').classList.add('on');
-    loadJosh();
-  }
-  history.replaceState(null,'','#/' + view);
+  document.getElementById('screen-' + view).classList.add('on');
+  history.replaceState(null, '', '#/' + view);
+  if (view === 'josh')     loadJosh();
+  if (view === 'calendar') loadCalendar();
+  if (view === 'janine')   loadJanine();
 }
 
-// ── JOSH ──────────────────────────────────────────────────
+// ── JOSH ────────────────────────────────────────────────────────────────────
 async function loadJosh() {
   const now = new Date();
   document.getElementById('j-weekday').textContent =
@@ -462,8 +507,6 @@ async function loadJosh() {
     now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
 
   const todayStr = todayISO();
-
-  // Check if logged today
   const { data: todayRow } = await db
     .from('work_logs').select('date, day_type').eq('date', todayStr).maybeSingle();
 
@@ -474,10 +517,9 @@ async function loadJosh() {
   if (todayRow) {
     btns.style.display   = 'none';
     logged.style.display = 'block';
-    const isFull = todayRow.day_type !== 'half';
-    badge.innerHTML = isFull
-      ? '☀️ &nbsp;Full day logged'
-      : '⛅ &nbsp;Half day logged';
+    badge.innerHTML = todayRow.day_type === 'half'
+      ? '⛅ &nbsp;Half day logged today'
+      : '☀️ &nbsp;Full day logged today';
   } else {
     btns.style.display   = 'grid';
     logged.style.display = 'none';
@@ -485,20 +527,18 @@ async function loadJosh() {
     document.getElementById('btn-half').disabled = false;
   }
 
-  // Recent days
   const { data: rows } = await db
     .from('work_logs').select('date, day_type')
     .order('date', {ascending:false}).limit(10);
 
   const list = document.getElementById('josh-list');
   if (!rows || rows.length === 0) {
-    list.innerHTML = '<div class="empty">No days logged yet — tap a button!</div>';
+    list.innerHTML = '<div class="empty">No days logged yet — tap a button!<br>🐄 The paddock awaits.</div>';
     return;
   }
   list.innerHTML = rows.map(r => {
     const half = r.day_type === 'half';
-    return `
-    <div class="day-row">
+    return `<div class="day-row">
       <div class="dot" style="${half ? 'opacity:0.4' : ''}"></div>
       <span style="flex:1">${fmtDate(r.date)}</span>
       <span style="font-size:11px;color:var(--muted)">${half ? '½ day' : 'full'}</span>
@@ -513,29 +553,157 @@ async function logToday(type) {
   const { error } = await db.from('work_logs').insert({ date: todayISO(), day_type: type });
 
   if (error) {
-    if (error.code === '23505') {
-      showToast('Already logged today!');
-    } else {
-      showToast('Could not log — check your connection');
+    if (error.code === '23505') { showToast(joke('duplicate')); }
+    else {
+      showToast(joke('error'));
       document.getElementById('btn-full').disabled = false;
       document.getElementById('btn-half').disabled = false;
       return;
     }
   } else {
-    showToast(type === 'full' ? 'Full day logged ✓' : 'Half day logged ✓');
+    showToast(joke(type));
   }
   loadJosh();
 }
 
 async function undoToday() {
-  const { error } = await db
-    .from('work_logs').delete().eq('date', todayISO());
-  if (error) { showToast('Could not undo — try again'); return; }
-  showToast('Removed today\'s entry');
+  const { error } = await db.from('work_logs').delete().eq('date', todayISO());
+  if (error) { showToast(joke('error')); return; }
+  showToast(joke('undo'));
   loadJosh();
 }
 
-// ── JANINE ────────────────────────────────────────────────
+// ── CALENDAR ────────────────────────────────────────────────────────────────
+async function loadCalendar() {
+  const y = calMonth.getFullYear();
+  const m = calMonth.getMonth();
+  const now = new Date();
+  const isCurrentMonth = y === now.getFullYear() && m === now.getMonth();
+
+  document.getElementById('cal-month-lbl').textContent = fmtMonth(calMonth);
+  document.getElementById('cal-next-btn').disabled = isCurrentMonth;
+
+  // Fetch all logs for this month
+  const start = `${y}-${pad(m+1)}-01`;
+  const end   = `${y}-${pad(m+1)}-${pad(new Date(y, m+1, 0).getDate())}`;
+  const { data: rows } = await db
+    .from('work_logs').select('date, day_type')
+    .gte('date', start).lte('date', end);
+
+  calLogs = {};
+  (rows || []).forEach(r => { calLogs[r.date] = r.day_type; });
+
+  renderCalGrid(y, m, now);
+}
+
+function renderCalGrid(y, m, now) {
+  const grid = document.getElementById('cal-grid');
+  const todayStr = todayISO();
+
+  // Day-of-week headers (Mon first)
+  const dows = ['M','T','W','T','F','S','S'];
+  let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // First day of month, offset for Mon=0 grid
+  const firstDay = new Date(y, m, 1);
+  const offset = (firstDay.getDay() + 6) % 7; // Mon=0
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+
+  // Empty cells before month starts
+  for (let i = 0; i < offset; i++) html += `<div class="cal-day cal-empty"></div>`;
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${y}-${pad(m+1)}-${pad(d)}`;
+    const dayDate = new Date(y, m, d);
+    const isFuture = dayDate > now && iso !== todayStr;
+    const isToday  = iso === todayStr;
+    const logged   = calLogs[iso];
+
+    let cls = 'cal-day';
+    if (isFuture)         cls += ' cal-future';
+    if (isToday)          cls += ' cal-today';
+    if (logged === 'full') cls += ' cal-full';
+    if (logged === 'half') cls += ' cal-half';
+
+    const pip = logged === 'full' ? '☀️' : logged === 'half' ? '⛅' : '';
+    const onclick = (!isFuture) ? `onclick="calTap('${iso}', ${!!logged})"` : '';
+
+    html += `<div class="${cls}" ${onclick}>
+      <span>${d}</span>
+      ${pip ? `<span class="cal-pip">${pip}</span>` : ''}
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function calTap(iso, isLogged) {
+  sheetDate = iso;
+  const [y,m,d] = iso.split('-').map(Number);
+  const label = new Date(y,m-1,d).toLocaleDateString('en-AU',
+    {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('sheet-title').textContent = label;
+
+  if (isLogged) {
+    const type = calLogs[iso];
+    document.getElementById('sheet-sub').textContent =
+      type === 'half' ? 'Currently logged as ⛅ half day' : 'Currently logged as ☀️ full day';
+    document.getElementById('sheet-log-btns').style.display = 'none';
+    document.getElementById('sheet-remove-btn').style.display = 'block';
+  } else {
+    document.getElementById('sheet-sub').textContent = 'How much of this day was worked?';
+    document.getElementById('sheet-log-btns').style.display = 'grid';
+    document.getElementById('sheet-remove-btn').style.display = 'none';
+  }
+
+  document.getElementById('backdrop').classList.add('on');
+  document.getElementById('day-sheet').classList.add('on');
+}
+
+async function sheetLog(type) {
+  closeSheet();
+  const { error } = await db.from('work_logs').insert({ date: sheetDate, day_type: type });
+  if (error) {
+    if (error.code === '23505') showToast(joke('duplicate'));
+    else showToast(joke('error'));
+    return;
+  }
+  showToast(joke(type));
+  loadCalendar();
+  // Refresh josh list too if it's today
+  if (sheetDate === todayISO()) loadJosh();
+}
+
+async function sheetRemove() {
+  closeSheet();
+  const { error } = await db.from('work_logs').delete().eq('date', sheetDate);
+  if (error) { showToast(joke('error')); return; }
+  showToast(joke('removed'));
+  loadCalendar();
+  if (sheetDate === todayISO()) loadJosh();
+}
+
+function closeSheet() {
+  document.getElementById('backdrop').classList.remove('on');
+  document.getElementById('day-sheet').classList.remove('on');
+}
+
+function calPrev() {
+  calMonth.setMonth(calMonth.getMonth() - 1);
+  loadCalendar();
+}
+function calNext() {
+  const next = new Date(calMonth);
+  next.setMonth(next.getMonth() + 1);
+  const now = new Date();
+  if (next.getFullYear() > now.getFullYear() ||
+     (next.getFullYear() === now.getFullYear() && next.getMonth() > now.getMonth())) return;
+  calMonth = next;
+  loadCalendar();
+}
+
+// ── JANINE ──────────────────────────────────────────────────────────────────
 function changeMonth(dir) {
   const next = new Date(curMonth);
   next.setMonth(next.getMonth() + dir);
@@ -551,9 +719,9 @@ async function loadJanine() {
   const m = curMonth.getMonth();
 
   const label = fmtMonth(curMonth);
-  document.getElementById('month-lbl').textContent  = label;
-  document.getElementById('print-sub').textContent  =
-    'Josh Pye  ·  ' + label + '  ·  Rate: $' + DAY_RATE + '/day';
+  document.getElementById('month-lbl').textContent = label;
+  document.getElementById('print-sub').textContent =
+    `Josh Pye  ·  ${label}  ·  Rate: $${DAY_RATE}/day`;
 
   const start = `${y}-${pad(m+1)}-01`;
   const end   = `${y}-${pad(m+1)}-${pad(new Date(y, m+1, 0).getDate())}`;
@@ -561,59 +729,77 @@ async function loadJanine() {
   document.getElementById('janine-list').innerHTML = '<div class="spinner"></div>';
 
   const { data: rows, error } = await db
-    .from('work_logs').select('date, day_type')
+    .from('work_logs').select('date, day_type, created_at')
     .gte('date', start).lte('date', end)
     .order('date', {ascending: true});
 
-  if (error) { showToast('Failed to load data'); return; }
-
-  const fullDays = rows.filter(r => r.day_type !== 'half').length;
-  const halfDays = rows.filter(r => r.day_type === 'half').length;
-  const dayTotal = fullDays + halfDays * 0.5;
-  const earned   = fullDays * DAY_RATE + halfDays * (DAY_RATE / 2);
+  if (error) { showToast('The shed door's stuck — try again 🚪'); return; }
 
   const now = new Date();
   const isNow = y === now.getFullYear() && m === now.getMonth();
-  // Disable → when already on current month
+
+  // Disable → on current month
   document.getElementById('btn-next-month').style.opacity = isNow ? '0.3' : '1';
   document.getElementById('btn-next-month').style.pointerEvents = isNow ? 'none' : 'auto';
+
+  const fullDays = rows.filter(r => r.day_type !== 'half').length;
+  const halfDays = rows.filter(r => r.day_type === 'half').length;
+  const earned   = fullDays * DAY_RATE + halfDays * (DAY_RATE / 2);
+
   document.getElementById('earn-lbl').textContent =
     isNow ? 'Earned so far this month' : 'Total earned this month';
   document.getElementById('earn-amt').textContent = fmtAUD(earned);
 
   let detail = '';
   if (fullDays > 0 && halfDays > 0)
-    detail = `${fullDays} full + ${halfDays} half = ${dayTotal} days × $${DAY_RATE}`;
+    detail = `${fullDays} full + ${halfDays} half = ${fullDays + halfDays*0.5} days × $${DAY_RATE}`;
   else if (halfDays > 0)
-    detail = `${halfDays} half day${halfDays !== 1 ? 's' : ''} × $${DAY_RATE / 2}`;
+    detail = `${halfDays} half day${halfDays !== 1 ? 's' : ''} × $${DAY_RATE/2}`;
   else
     detail = `${fullDays} day${fullDays !== 1 ? 's' : ''} × $${DAY_RATE}/day`;
   document.getElementById('earn-detail').textContent = detail;
+
+  // Retrospective entries
+  const retroRows = rows.filter(isRetro);
+  const noteWrap  = document.getElementById('retro-note-wrap');
+  if (retroRows.length > 0 && !isNow) {
+    const dates = retroRows.map(r => {
+      const when = new Date(r.created_at).toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'});
+      return `added ${when}`;
+    });
+    const unique = [...new Set(dates)];
+    noteWrap.innerHTML = `<div class="retro-note">
+      <strong>✏ Statement updated after month closed</strong><br>
+      ${retroRows.length} entr${retroRows.length > 1 ? 'ies were' : 'y was'} added retrospectively (${unique.join(', ')}).
+    </div>`;
+  } else {
+    noteWrap.innerHTML = '';
+  }
 
   const list = document.getElementById('janine-list');
   if (rows.length === 0) {
     list.innerHTML = '<div class="empty">No days worked this month.</div>';
     return;
   }
+
   list.innerHTML = rows.map(r => {
-    const half = r.day_type === 'half';
-    return `
-    <div class="day-row">
+    const half  = r.day_type === 'half';
+    const retro = isRetro(r);
+    return `<div class="day-row">
       <div class="dot" style="${half ? 'opacity:0.4' : ''}"></div>
-      <span style="flex:1">${fmtDate(r.date)}</span>
-      <span style="font-size:11px;color:var(--muted);background:var(--card2);padding:3px 8px;border-radius:6px">${half ? '½ day' : 'full day'}</span>
+      <span style="flex:1">${retro ? '✏ ' : ''}${fmtDate(r.date)}</span>
+      <span style="font-size:11px;color:var(--muted);background:var(--card2);padding:3px 8px;border-radius:6px">
+        ${half ? '½ day' : 'full day'}
+      </span>
     </div>`;
   }).join('');
 }
 
-function printStatement() {
-  window.print();
-}
-
-// ── START ─────────────────────────────────────────────────
-const startHash = window.location.hash;
-if (startHash.includes('janine')) gotoView('janine');
-else gotoView('josh');
+// ── START ────────────────────────────────────────────────────────────────────
+const h = window.location.hash;
+if (h.includes('janine'))   gotoView('janine');
+else if (h.includes('cal')) gotoView('calendar');
+else                         gotoView('josh');
 </script>
 </body>
 </html>
