@@ -926,7 +926,7 @@ async function loadProfile(userId) {
 // ===== UTILITIES =====
 function sanitize(str) {
   if (!str) return '';
-  return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function formatAUD(amount) {
@@ -1308,6 +1308,14 @@ function renderSignup(el) {
 
     currentUser = data.user;
     currentProfile = await loadProfile(data.user.id);
+
+    // Check for post-signup redirect (e.g. accept-invite flow)
+    const signupParams = Object.fromEntries(new URLSearchParams((window.location.hash.split('?')[1] || '')));
+    if (signupParams.return === 'accept-invite' && signupParams.token) {
+      navigate('/accept-invite?token=' + signupParams.token);
+      return;
+    }
+
     if (role === 'admin') navigate('/onboarding');
     else navigate('/dashboard');
   });
@@ -1376,6 +1384,14 @@ function renderLogin(el) {
     currentProfile = await loadProfile(data.user.id);
 
     if (isExpired(currentProfile)) { navigate('/paywall'); return; }
+
+    // Check for post-login redirect (e.g. accept-invite flow)
+    const loginParams = Object.fromEntries(new URLSearchParams((window.location.hash.split('?')[1] || '')));
+    if (loginParams.return === 'accept-invite' && loginParams.token) {
+      navigate('/accept-invite?token=' + loginParams.token);
+      return;
+    }
+
     if (!currentProfile.onboarding_completed && (currentProfile.role === 'admin' || currentProfile.role === 'both')) {
       navigate('/onboarding');
     } else {
@@ -1394,7 +1410,7 @@ function renderForgotPassword(el) {
         <p class="text-muted text-sm" style="margin-top:6px">Enter your email to receive a reset link.</p>
       </div>
 
-      <form id="forgot-form" id="forgot-form">
+      <form id="forgot-form">
         <div class="form-group">
           <label class="form-label">Email address</label>
           <input type="email" id="fp-email" class="form-input" placeholder="you@gmail.com" autocomplete="email" required>
@@ -2723,8 +2739,8 @@ function exportAuditCSV() {
 }
 
 async function deleteAccount() {
-  const confirm = document.getElementById('delete-confirm')?.value;
-  if (confirm !== 'DELETE') { showToast('Type DELETE exactly to confirm', 'error'); return; }
+  const confirmText = document.getElementById('delete-confirm')?.value;
+  if (confirmText !== 'DELETE') { showToast('Type DELETE exactly to confirm', 'error'); return; }
   // Account deletion via Supabase Auth — cascades to all profile data
   const { error } = await db.rpc('delete_user');
   if (error) { showToast('Contact support@paddockpay.com.au to delete your account.', 'error'); return; }
