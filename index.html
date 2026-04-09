@@ -88,37 +88,61 @@
       color: var(--fg);
     }
 
+    .day-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
     .big-btn {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       width: 100%;
-      padding: 32px 20px;
+      padding: 28px 16px;
       border-radius: 20px;
       border: 2px solid var(--wheat);
       background: transparent;
       color: var(--wheat);
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
+      font-family: 'DM Mono', monospace;
       cursor: pointer;
       transition: all 0.18s;
-      margin-bottom: 10px;
     }
+    .big-btn .btn-icon { font-size: 28px; line-height: 1; }
+    .big-btn .btn-label { font-family: 'Playfair Display', serif; font-size: 17px; }
+    .big-btn .btn-rate  { font-size: 12px; color: var(--muted); }
     .big-btn:hover:not(:disabled) {
       background: var(--wheat);
       color: var(--bg);
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(212,168,67,0.2);
     }
+    .big-btn:hover:not(:disabled) .btn-rate { color: var(--bg); opacity: 0.7; }
     .big-btn:active:not(:disabled) { transform: translateY(0); }
     .big-btn.done {
       background: var(--green);
       border-color: var(--green);
       color: #fff;
+      cursor: default;
     }
-    .big-btn.done:hover { transform: none; box-shadow: none; background: var(--green); color: #fff; }
+    .big-btn.done .btn-rate { color: rgba(255,255,255,0.7); }
+    .big-btn.done:hover { transform: none; box-shadow: none; }
 
+    .logged-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      border-radius: 20px;
+      background: var(--green);
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
     .undo-btn {
       display: block;
       width: 100%;
@@ -374,13 +398,22 @@
     <div class="date-full"    id="j-date"></div>
   </div>
 
-  <button class="big-btn" id="log-btn" onclick="logToday()">
-    <span id="log-icon">☀️</span>
-    <span id="log-txt">Log today's work</span>
-  </button>
-  <button class="undo-btn" id="undo-btn" style="display:none" onclick="undoToday()">
-    ↩ Undo today's entry
-  </button>
+  <div class="day-btns" id="log-btns">
+    <button class="big-btn" id="btn-full" onclick="logToday('full')">
+      <span class="btn-icon">☀️</span>
+      <span class="btn-label">Full Day</span>
+      <span class="btn-rate">$350</span>
+    </button>
+    <button class="big-btn" id="btn-half" onclick="logToday('half')">
+      <span class="btn-icon">⛅</span>
+      <span class="btn-label">Half Day</span>
+      <span class="btn-rate">$175</span>
+    </button>
+  </div>
+  <div id="logged-state" style="display:none">
+    <div class="logged-badge" id="logged-badge"></div>
+    <button class="undo-btn" onclick="undoToday()">↩ Undo today's entry</button>
+  </div>
 
   <div class="sec-label">Recent days worked</div>
   <div class="day-list" id="josh-list"><div class="spinner"></div></div>
@@ -515,59 +548,64 @@ async function loadJosh() {
 
   // Check if logged today
   const { data: todayRow } = await db
-    .from('work_logs').select('date').eq('date', todayStr).maybeSingle();
+    .from('work_logs').select('date, day_type').eq('date', todayStr).maybeSingle();
 
-  const btn  = document.getElementById('log-btn');
-  const undo = document.getElementById('undo-btn');
+  const btns   = document.getElementById('log-btns');
+  const logged = document.getElementById('logged-state');
+  const badge  = document.getElementById('logged-badge');
+
   if (todayRow) {
-    btn.classList.add('done');
-    document.getElementById('log-icon').textContent = '✓';
-    document.getElementById('log-txt').textContent  = 'Logged for today';
-    btn.disabled = true;
-    undo.style.display = 'block';
+    btns.style.display   = 'none';
+    logged.style.display = 'block';
+    const isFull = todayRow.day_type !== 'half';
+    badge.innerHTML = isFull
+      ? '☀️ &nbsp;Full day logged'
+      : '⛅ &nbsp;Half day logged';
   } else {
-    btn.classList.remove('done');
-    document.getElementById('log-icon').textContent = '☀️';
-    document.getElementById('log-txt').textContent  = 'Log today\'s work';
-    btn.disabled = false;
-    undo.style.display = 'none';
+    btns.style.display   = 'grid';
+    logged.style.display = 'none';
+    document.getElementById('btn-full').disabled = false;
+    document.getElementById('btn-half').disabled = false;
   }
 
   // Recent days
   const { data: rows } = await db
-    .from('work_logs').select('date')
+    .from('work_logs').select('date, day_type')
     .order('date', {ascending:false}).limit(10);
 
   const list = document.getElementById('josh-list');
   if (!rows || rows.length === 0) {
-    list.innerHTML = '<div class="empty">No days logged yet — tap the button!</div>';
+    list.innerHTML = '<div class="empty">No days logged yet — tap a button!</div>';
     return;
   }
-  list.innerHTML = rows.map(r => `
+  list.innerHTML = rows.map(r => {
+    const half = r.day_type === 'half';
+    return `
     <div class="day-row">
-      <div class="dot"></div>
-      <span>${fmtDate(r.date)}</span>
-    </div>`).join('');
+      <div class="dot" style="${half ? 'opacity:0.4' : ''}"></div>
+      <span style="flex:1">${fmtDate(r.date)}</span>
+      <span style="font-size:11px;color:var(--muted)">${half ? '½ day' : 'full'}</span>
+    </div>`;
+  }).join('');
 }
 
-async function logToday() {
-  const btn = document.getElementById('log-btn');
-  btn.disabled = true;
-  document.getElementById('log-txt').textContent = 'Logging...';
+async function logToday(type) {
+  document.getElementById('btn-full').disabled = true;
+  document.getElementById('btn-half').disabled = true;
 
-  const { error } = await db.from('work_logs').insert({ date: todayISO() });
+  const { error } = await db.from('work_logs').insert({ date: todayISO(), day_type: type });
 
   if (error) {
     if (error.code === '23505') {
       showToast('Already logged today!');
     } else {
       showToast('Could not log — check your connection');
-      btn.disabled = false;
-      document.getElementById('log-txt').textContent = 'Log today\'s work';
+      document.getElementById('btn-full').disabled = false;
+      document.getElementById('btn-half').disabled = false;
       return;
     }
   } else {
-    showToast('Day logged ✓');
+    showToast(type === 'full' ? 'Full day logged ✓' : 'Half day logged ✓');
   }
   loadJosh();
 }
@@ -601,33 +639,46 @@ async function loadJanine() {
   document.getElementById('janine-list').innerHTML = '<div class="spinner"></div>';
 
   const { data: rows, error } = await db
-    .from('work_logs').select('date')
+    .from('work_logs').select('date, day_type')
     .gte('date', start).lte('date', end)
     .order('date', {ascending: true});
 
   if (error) { showToast('Failed to load data'); return; }
 
-  const count  = rows.length;
-  const earned = count * DAY_RATE;
+  const fullDays = rows.filter(r => r.day_type !== 'half').length;
+  const halfDays = rows.filter(r => r.day_type === 'half').length;
+  const dayTotal = fullDays + halfDays * 0.5;
+  const earned   = fullDays * DAY_RATE + halfDays * (DAY_RATE / 2);
 
   const now = new Date();
   const isNow = y === now.getFullYear() && m === now.getMonth();
   document.getElementById('earn-lbl').textContent =
     isNow ? 'Earned so far this month' : 'Total earned this month';
-  document.getElementById('earn-amt').textContent    = fmtAUD(earned);
-  document.getElementById('earn-detail').textContent =
-    `${count} day${count !== 1 ? 's' : ''} \u00d7 $${DAY_RATE}/day`;
+  document.getElementById('earn-amt').textContent = fmtAUD(earned);
+
+  let detail = '';
+  if (fullDays > 0 && halfDays > 0)
+    detail = `${fullDays} full + ${halfDays} half = ${dayTotal} days × $${DAY_RATE}`;
+  else if (halfDays > 0)
+    detail = `${halfDays} half day${halfDays !== 1 ? 's' : ''} × $${DAY_RATE / 2}`;
+  else
+    detail = `${fullDays} day${fullDays !== 1 ? 's' : ''} × $${DAY_RATE}/day`;
+  document.getElementById('earn-detail').textContent = detail;
 
   const list = document.getElementById('janine-list');
-  if (count === 0) {
+  if (rows.length === 0) {
     list.innerHTML = '<div class="empty">No days worked this month.</div>';
     return;
   }
-  list.innerHTML = rows.map(r => `
+  list.innerHTML = rows.map(r => {
+    const half = r.day_type === 'half';
+    return `
     <div class="day-row">
-      <div class="dot"></div>
-      <span>${fmtDate(r.date)}</span>
-    </div>`).join('');
+      <div class="dot" style="${half ? 'opacity:0.4' : ''}"></div>
+      <span style="flex:1">${fmtDate(r.date)}</span>
+      <span style="font-size:11px;color:var(--muted);background:var(--card2);padding:3px 8px;border-radius:6px">${half ? '½ day' : 'full day'}</span>
+    </div>`;
+  }).join('');
 }
 
 function printStatement() {
