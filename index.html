@@ -13,7 +13,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- Primary CDN for Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Fallback: if primary CDN failed to define supabase, load from unpkg
+    if (typeof supabase === 'undefined') {
+      document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+    }
+  </script>
+  <script>
+    // Hard safety net: if app hasn't booted in 10s, show error with reload button
+    window._initTimeout = setTimeout(function() {
+      var ls = document.getElementById('loading-screen');
+      var app = document.getElementById('app');
+      if (ls && ls.style.display !== 'none') {
+        ls.style.display = 'none';
+        if (app) app.style.display = 'flex';
+        var vc = document.getElementById('view-container');
+        if (vc) vc.innerHTML = '<div style="padding:60px 20px;text-align:center;color:#F2E4C4;font-family:monospace"><div style="font-family:Georgia,serif;color:#D4A843;font-size:28px;margin-bottom:20px">PaddockPay</div><p style="color:#8A7060;margin-bottom:8px">Taking longer than expected to load.</p><p style="color:#8A7060;font-size:13px;margin-bottom:28px">This is usually caused by a slow internet connection or a network firewall.</p><button onclick="location.reload()" style="background:#D4A843;color:#1A1008;border:none;border-radius:6px;padding:14px 28px;font-size:15px;cursor:pointer;font-family:monospace;font-weight:600">Reload app</button></div>';
+      }
+    }, 10000);
+  </script>
 
   <style>
     /* ===== DESIGN SYSTEM ===== */
@@ -2822,28 +2842,38 @@ async function extendTrial() {
 
 // ===== INIT =====
 async function init() {
+  // Clear safety-net timeout once init actually runs
+  clearTimeout(window._initTimeout);
+
   // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/paddockpay/sw.js').catch(() => {});
   }
 
-  // Open IndexedDB
-  await openIDB();
+  // Open IndexedDB (non-blocking — don't let failure stop boot)
+  try { await openIDB(); } catch(e) { console.warn('IndexedDB unavailable:', e); }
 
-  // Check session
-  const { data: { session } } = await db.auth.getSession();
-  currentUser = session?.user || null;
-  if (currentUser) {
-    currentProfile = await loadProfile(currentUser.id);
-    await updatePendingCount();
-    if (navigator.onLine) flushQueue();
+  // Check session — with 6s timeout so we never hang forever
+  try {
+    const sessionPromise = db.auth.getSession();
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000));
+    const { data: { session } } = await Promise.race([sessionPromise, timeout]);
+    currentUser = session?.user || null;
+    if (currentUser) {
+      currentProfile = await loadProfile(currentUser.id);
+      await updatePendingCount();
+      if (navigator.onLine) flushQueue();
+    }
+  } catch(e) {
+    console.warn('Session check failed or timed out:', e.message);
+    currentUser = null;
   }
 
   // Handle Xero callback params
   const hash = window.location.hash;
   if (hash.includes('xero=connected')) {
     showToast('Xero connected successfully!', 'success');
-    await writeAudit('xero_connected', 'profiles', currentUser?.id, null, { connected: true }, 'admin');
+    if (currentUser) await writeAudit('xero_connected', 'profiles', currentUser.id, null, { connected: true }, 'admin');
   } else if (hash.includes('xero=error')) {
     showToast('Xero connection failed. Please try again.', 'error');
   }
