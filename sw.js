@@ -1,4 +1,4 @@
-const CACHE = 'paddockpay-v4';
+const CACHE = 'paddockpay-v5';
 const STATIC = [
   '/paddockpay/',
   '/paddockpay/index.html',
@@ -8,7 +8,13 @@ const STATIC = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
+  e.waitUntil(
+    caches.open(CACHE).then(async c => {
+      await c.addAll(STATIC);
+      // Cache supabase.js separately — don't let it block install if slow
+      try { await c.add('/paddockpay/supabase.js'); } catch(_) {}
+    })
+  );
   self.skipWaiting();
 });
 
