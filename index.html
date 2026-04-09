@@ -441,7 +441,13 @@ function joke(type) {
 
 // ── INIT ────────────────────────────────────────────────────────────────────
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+const db = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionFromUrl: false
+  }
+});
 
 let curMonth    = new Date(); curMonth.setDate(1);
 let calMonth    = new Date(); calMonth.setDate(1);
