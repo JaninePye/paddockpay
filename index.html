@@ -733,7 +733,7 @@ async function loadJanine() {
     .gte('date', start).lte('date', end)
     .order('date', {ascending: true});
 
-  if (error) { showToast('The shed door's stuck — try again 🚪'); return; }
+  if (error) { showToast("The shed door's stuck — try again 🚪"); return; }
 
   const now = new Date();
   const isNow = y === now.getFullYear() && m === now.getMonth();
