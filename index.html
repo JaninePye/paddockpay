@@ -2558,7 +2558,7 @@ async function renderSettings(el, params) {
     { id: 'danger', label: 'Danger Zone' },
   ];
 
-  function renderTabContent() {
+  async function renderTabContent() {
     const tabContent = document.getElementById('settings-tab-content');
     if (!tabContent) return;
     tabs.forEach(t => {
