@@ -1024,12 +1024,9 @@ async function router() {
   const logoutBtn = document.getElementById('header-logout');
   const container = document.getElementById('view-container');
 
-  // Check session
-  const { data: { session } } = await db.auth.getSession();
-  currentUser = session?.user || null;
-
+  // Use already-resolved currentUser (set in init) — no network call in router
   if (currentUser && !currentProfile) {
-    currentProfile = await loadProfile(currentUser.id);
+    try { currentProfile = await loadProfile(currentUser.id); } catch(e) {}
   }
 
   const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/accept-invite'];
@@ -2822,58 +2819,76 @@ async function extendTrial() {
 }
 
 // ===== INIT =====
-async function init() {
-  // Clear safety-net timeout once init actually runs
-  clearTimeout(window._initTimeout);
-
-  // Register service worker
+function init() {
+  // Register service worker — fire and forget
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/paddockpay/sw.js').catch(() => {});
   }
 
-  // Open IndexedDB (non-blocking — don't let failure stop boot)
-  try { await openIDB(); } catch(e) { console.warn('IndexedDB unavailable:', e); }
-
-  // Check session — with 6s timeout so we never hang forever
+  // Read session from localStorage synchronously — ZERO network, ZERO blocking
+  // Supabase v2 stores session under this key
   try {
-    const sessionPromise = db.auth.getSession();
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000));
-    const { data: { session } } = await Promise.race([sessionPromise, timeout]);
-    currentUser = session?.user || null;
-    if (currentUser) {
-      currentProfile = await loadProfile(currentUser.id);
-      await updatePendingCount();
-      if (navigator.onLine) flushQueue();
+    const raw = localStorage.getItem('sb-qfuffybirntwooanvtte-auth-token');
+    if (raw) {
+      const stored = JSON.parse(raw);
+      if (stored && stored.user) {
+        currentUser = stored.user;
+      }
     }
-  } catch(e) {
-    console.warn('Session check failed or timed out:', e.message);
-    currentUser = null;
-  }
+  } catch(e) {}
+
+  // Show app immediately — no waiting
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  // Route based on what we know right now
+  router();
 
   // Handle Xero callback params
   const hash = window.location.hash;
   if (hash.includes('xero=connected')) {
     showToast('Xero connected successfully!', 'success');
-    if (currentUser) await writeAudit('xero_connected', 'profiles', currentUser.id, null, { connected: true }, 'admin');
   } else if (hash.includes('xero=error')) {
     showToast('Xero connection failed. Please try again.', 'error');
   }
 
-  // Hide loading, show app
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  // Background: open IndexedDB (never blocks startup)
+  openIDB().then(() => {
+    updatePendingCount();
+    if (navigator.onLine && currentUser) flushQueue();
+  }).catch(() => {});
 
-  // Route
-  await router();
+  // Background: verify session with Supabase (refreshes token if needed)
+  // This runs AFTER the page is already showing
+  db.auth.getSession().then(({ data: { session } }) => {
+    const wasLoggedIn = !!currentUser;
+    currentUser = session?.user || null;
+    if (currentUser) {
+      loadProfile(currentUser.id).then(p => {
+        currentProfile = p;
+        updateSyncUI();
+        // If we weren't logged in before (localStorage was empty), re-route now
+        if (!wasLoggedIn) router();
+      }).catch(() => {});
+    } else if (wasLoggedIn) {
+      // Session expired — re-route to login
+      currentProfile = null;
+      router();
+    }
+  }).catch(() => {
+    // Supabase unreachable — keep whatever we got from localStorage
+  });
 
-  // Listen for auth changes
+  // Listen for auth changes (sign in / sign out events)
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
       currentUser = session.user;
-      currentProfile = await loadProfile(session.user.id);
+      try { currentProfile = await loadProfile(session.user.id); } catch(e) {}
+      updateSyncUI();
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       currentProfile = null;
+      updateSyncUI();
     }
   });
 }
