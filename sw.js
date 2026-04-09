@@ -1,12 +1,12 @@
-const CACHE = 'paddockpay-v2';
+const CACHE = 'paddockpay-v3';
 const STATIC = [
   '/paddockpay/',
   '/paddockpay/index.html',
-  '/paddockpay/supabase.js',
   '/paddockpay/manifest.json',
   '/paddockpay/icons/icon-192.png',
   '/paddockpay/icons/icon-512.png'
 ];
+// supabase.js is large (187KB) — cached opportunistically on first fetch, not at install time
 
 // Install: cache static assets
 self.addEventListener('install', e => {
