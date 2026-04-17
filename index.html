@@ -81,7 +81,7 @@
     .date-block { text-align: center; margin-bottom: 36px; }
     .date-weekday { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
     .date-full { font-family: 'Playfair Display', serif; font-size: 30px; }
-    .day-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+    .day-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 10px; }
     .big-btn {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 8px; width: 100%;
@@ -313,6 +313,11 @@
       <span class="btn-label">Half Day</span>
       <span class="btn-rate">$175</span>
     </button>
+    <button class="big-btn" id="btn-nowork" onclick="logToday('no_work')">
+      <span class="btn-icon">🌧️</span>
+      <span class="btn-label">No Work</span>
+      <span class="btn-rate">$0</span>
+    </button>
   </div>
   <div id="logged-state" style="display:none">
     <div class="logged-badge" id="logged-badge"></div>
@@ -410,6 +415,13 @@ const JOKES = {
     "Half day logged. The sheep won't judge ya! 🐑",
     "Short day, long paddock — fair enough! 🌾",
     "Half a loaf is better than none, especially on the farm! 🍞",
+  ],
+  no_work: [
+    "Even the tractor needs a day off! 🚜",
+    "No work today — the paddock can wait! 🌧️",
+    "Rest up, mate — big days ahead! 🐄",
+    "Logged a spell. The cattle understand! 🐮",
+    "Nothing doing today — she'll be right tomorrow! ☁️",
   ],
   removed: [
     "Gone like a sheep through a fence! 🐑",
@@ -526,6 +538,8 @@ async function loadJosh() {
     logged.style.display = 'block';
     badge.innerHTML = todayRow.day_type === 'half'
       ? '⛅ &nbsp;Half day logged today'
+      : todayRow.day_type === 'no_work'
+      ? '🌧️ &nbsp;No work logged today'
       : '☀️ &nbsp;Full day logged today';
   } else {
     btns.style.display   = 'grid';
@@ -556,6 +570,7 @@ async function loadJosh() {
 async function logToday(type) {
   document.getElementById('btn-full').disabled = true;
   document.getElementById('btn-half').disabled = true;
+  document.getElementById('btn-nowork').disabled = true;
 
   const { error } = await db.from('work_logs').insert({ date: todayISO(), day_type: type });
 
@@ -568,7 +583,7 @@ async function logToday(type) {
       return;
     }
   } else {
-    showToast(joke(type));
+    showToast(joke(type === 'no_work' ? 'no_work' : type));
   }
   loadJosh();
 }
@@ -749,7 +764,7 @@ async function loadJanine() {
   document.getElementById('btn-next-month').style.opacity = isNow ? '0.3' : '1';
   document.getElementById('btn-next-month').style.pointerEvents = isNow ? 'none' : 'auto';
 
-  const fullDays = rows.filter(r => r.day_type !== 'half').length;
+  const fullDays = rows.filter(r => r.day_type !== 'half' && r.day_type !== 'no_work').length;
   const halfDays = rows.filter(r => r.day_type === 'half').length;
   const earned   = fullDays * DAY_RATE + halfDays * (DAY_RATE / 2);
 
@@ -792,11 +807,12 @@ async function loadJanine() {
   list.innerHTML = rows.map(r => {
     const half  = r.day_type === 'half';
     const retro = isRetro(r);
+    const noWork = r.day_type === 'no_work';
     return `<div class="day-row">
-      <div class="dot" style="${half ? 'opacity:0.4' : ''}"></div>
+      <div class="dot" style="${half || noWork ? 'opacity:0.4' : ''}"></div>
       <span style="flex:1">${retro ? '✏ ' : ''}${fmtDate(r.date)}</span>
       <span style="font-size:11px;color:var(--muted);background:var(--card2);padding:3px 8px;border-radius:6px">
-        ${half ? '½ day' : 'full day'}
+        ${noWork ? 'no work' : half ? '½ day' : 'full day'}
       </span>
     </div>`;
   }).join('');
