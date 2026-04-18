@@ -150,8 +150,9 @@
     .cal-day.cal-empty { cursor: default; }
     .cal-day.cal-future { opacity: 0.25; cursor: default; }
     .cal-day.cal-today { border-color: var(--fg) !important; }
-    .cal-day.cal-full  { background: var(--wheat); color: var(--bg); font-weight: 600; }
-    .cal-day.cal-half  { background: var(--half); color: var(--wheat); font-weight: 600; }
+    .cal-day.cal-full    { background: var(--wheat); color: var(--bg); font-weight: 600; }
+    .cal-day.cal-half    { background: var(--half); color: var(--wheat); font-weight: 600; }
+    .cal-day.cal-nowork  { background: var(--border); color: var(--muted); font-weight: 600; }
     .cal-day.cal-full .cal-pip, .cal-day.cal-half .cal-pip { display: block; }
     .cal-pip { display: none; font-size: 8px; line-height: 1; }
     .cal-hint { text-align: center; font-size: 12px; color: var(--muted); margin-bottom: 20px; }
@@ -343,6 +344,9 @@
     <div class="cal-legend-item">
       <div class="cal-legend-dot" style="background:var(--half)"></div> Half day
     </div>
+    <div class="cal-legend-item">
+      <div class="cal-legend-dot" style="background:var(--border)"></div> No work
+    </div>
   </div>
 </div>
 
@@ -373,7 +377,7 @@
 <div class="sheet" id="day-sheet">
   <div class="sheet-title" id="sheet-title"></div>
   <div class="sheet-sub"   id="sheet-sub"></div>
-  <div class="sheet-btns" id="sheet-log-btns">
+  <div class="sheet-btns" id="sheet-log-btns" style="grid-template-columns: 1fr 1fr 1fr;">
     <button class="sheet-btn" onclick="sheetLog('full')">
       <span class="s-icon">☀️</span>
       <span class="s-label">Full Day</span>
@@ -383,6 +387,11 @@
       <span class="s-icon">⛅</span>
       <span class="s-label">Half Day</span>
       <span class="s-rate">$175</span>
+    </button>
+    <button class="sheet-btn" onclick="sheetLog('no_work')">
+      <span class="s-icon">🌧️</span>
+      <span class="s-label">No Work</span>
+      <span class="s-rate">$0</span>
     </button>
   </div>
   <button class="sheet-remove" id="sheet-remove-btn" onclick="sheetRemove()" style="display:none">
@@ -645,10 +654,11 @@ function renderCalGrid(y, m, now) {
     let cls = 'cal-day';
     if (isFuture)         cls += ' cal-future';
     if (isToday)          cls += ' cal-today';
-    if (logged === 'full') cls += ' cal-full';
-    if (logged === 'half') cls += ' cal-half';
+    if (logged === 'full')    cls += ' cal-full';
+    if (logged === 'half')    cls += ' cal-half';
+    if (logged === 'no_work') cls += ' cal-nowork';
 
-    const pip = logged === 'full' ? '☀️' : logged === 'half' ? '⛅' : '';
+    const pip = logged === 'full' ? '☀️' : logged === 'half' ? '⛅' : logged === 'no_work' ? '🌧️' : '';
     const onclick = (!isFuture) ? `onclick="calTap('${iso}', ${!!logged})"` : '';
 
     html += `<div class="${cls}" ${onclick}>
@@ -670,7 +680,9 @@ function calTap(iso, isLogged) {
   if (isLogged) {
     const type = calLogs[iso];
     document.getElementById('sheet-sub').textContent =
-      type === 'half' ? 'Currently logged as ⛅ half day' : 'Currently logged as ☀️ full day';
+      type === 'half'    ? 'Currently logged as ⛅ half day' :
+      type === 'no_work' ? 'Currently logged as 🌧️ no work' :
+                           'Currently logged as ☀️ full day';
     document.getElementById('sheet-log-btns').style.display = 'none';
     document.getElementById('sheet-remove-btn').style.display = 'block';
   } else {
