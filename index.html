@@ -367,6 +367,16 @@
     <div class="earn-detail" id="earn-detail">0 days &times; $350/day</div>
   </div>
   <button class="dl-btn" onclick="window.print()">&#8595;&nbsp; Download / Print Statement</button>
+
+  <!-- XERO SECTION -->
+  <div style="margin-bottom:24px">
+    <div class="sec-label" style="margin-bottom:10px">Xero Integration</div>
+    <div id="xero-status-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:8px;font-size:13px">
+      <div id="xero-status-inner">Checking Xero connection...</div>
+    </div>
+    <div id="invoice-history"></div>
+  </div>
+
   <div id="retro-note-wrap"></div>
   <div class="sec-label">Days worked</div>
   <div class="day-list" id="janine-list"><div class="spinner"></div></div>
@@ -401,6 +411,18 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- XERO PIN MODAL -->
+<div id="pin-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:40;align-items:flex-end;justify-content:center" onclick="closePinModal(event)">
+  <div style="background:var(--card2);border-top:2px solid var(--wheat);border-radius:20px 20px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom)+24px);width:100%;max-width:480px">
+    <div style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:6px;text-align:center">Send Invoice to Xero</div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px" id="pin-month-label"></div>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="Enter 4-digit PIN"
+      style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-family:'DM Mono',monospace;font-size:16px;text-align:center;letter-spacing:4px;margin-bottom:12px">
+    <button onclick="submitPin()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--wheat);color:var(--bg);font-family:'DM Mono',monospace;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px">Send Invoice</button>
+    <button onclick="document.getElementById('pin-backdrop').style.display='none'" style="width:100%;padding:10px;border:none;background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer">Cancel</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -764,6 +786,8 @@ async function loadJanine() {
   const start = `${y}-${pad(m+1)}-01`;
   const end   = `${y}-${pad(m+1)}-${pad(new Date(y, m+1, 0).getDate())}`;
 
+  loadXeroStatus();
+  loadInvoiceHistory();
   document.getElementById('janine-list').innerHTML = '<div class="spinner"></div>';
 
   const { data: rows, error } = await db
@@ -832,6 +856,172 @@ async function loadJanine() {
       </span>
     </div>`;
   }).join('');
+}
+
+// ── XERO ─────────────────────────────────────────────────────────────────────
+const SUPABASE_FUNCTIONS = 'https://qfuffybirntwooanvtte.supabase.co/functions/v1';
+const ANON_KEY = SUPABASE_ANON;
+const MONTH_NAMES_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_NAMES_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+async function loadXeroStatus() {
+  const inner = document.getElementById('xero-status-inner');
+  if (!inner) return;
+
+  const hashParams = new URLSearchParams((window.location.hash.split('?')[1] || ''));
+  const xeroParam = hashParams.get('xero');
+  if (xeroParam === 'connected') {
+    showToast('✓ Xero connected successfully! 🎉');
+    history.replaceState(null, '', '#/janine');
+  } else if (xeroParam === 'error') {
+    showToast('Xero connection failed — please try again');
+    history.replaceState(null, '', '#/janine');
+  }
+
+  try {
+    const { data, error } = await db
+      .from('xero_config')
+      .select('org_name, updated_at')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error || !data || !data.org_name) {
+      inner.innerHTML = `
+        <div style="color:var(--muted);margin-bottom:12px">Not connected to Xero</div>
+        <button onclick="connectXero()" style="width:100%;padding:12px;border-radius:10px;border:2px solid var(--wheat);background:transparent;color:var(--wheat);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer">
+          Connect Xero →
+        </button>`;
+    } else {
+      const when = new Date(data.updated_at).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'});
+      const prev = new Date(); prev.setMonth(prev.getMonth() - 1);
+      const prevMonth = MONTH_NAMES_FULL[prev.getMonth()];
+      const prevYear = prev.getFullYear();
+      inner.innerHTML = `
+        <div style="color:var(--green);margin-bottom:4px">✓ Connected to ${data.org_name}</div>
+        <div style="color:var(--muted);font-size:11px;margin-bottom:14px">Last synced ${when}</div>
+        <button onclick="openPinModal('${prevMonth}', ${prevYear})" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--wheat);background:transparent;color:var(--wheat);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;margin-bottom:8px">
+          ↑ Send invoice for ${prevMonth} ${prevYear}
+        </button>
+        <button onclick="disconnectXero()" style="width:100%;padding:8px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer">
+          Disconnect Xero
+        </button>`;
+    }
+  } catch(e) {
+    inner.innerHTML = `<span style="color:var(--red)">Error checking Xero status — check connection</span>`;
+  }
+}
+
+async function connectXero() {
+  try {
+    const res = await fetch(`${SUPABASE_FUNCTIONS}/xero-auth-url`, {
+      headers: { 'Authorization': `Bearer ${ANON_KEY}` }
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Could not generate Xero login URL — try again');
+    }
+  } catch(e) {
+    showToast('Connection error — check internet and try again');
+  }
+}
+
+async function disconnectXero() {
+  if (!confirm('Disconnect Xero? Invoice history is kept. You can reconnect at any time.')) return;
+  await db.from('xero_config').delete().eq('id', 1);
+  loadXeroStatus();
+  showToast('Xero disconnected');
+}
+
+let _pinMonth = '';
+let _pinYear = 0;
+
+function openPinModal(month, year) {
+  _pinMonth = month;
+  _pinYear = year;
+  document.getElementById('pin-month-label').textContent = `${month} ${year} — Josh Pye`;
+  document.getElementById('pin-input').value = '';
+  const bd = document.getElementById('pin-backdrop');
+  bd.style.display = 'flex';
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+function closePinModal(e) {
+  if (e.target === document.getElementById('pin-backdrop')) {
+    document.getElementById('pin-backdrop').style.display = 'none';
+  }
+}
+
+async function submitPin() {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (pin.length !== 4) { showToast('Enter your 4-digit PIN'); return; }
+  document.getElementById('pin-backdrop').style.display = 'none';
+
+  const monthNum = MONTH_NAMES_FULL.indexOf(_pinMonth) + 1;
+  showToast('Sending invoice to Xero... 🚜');
+
+  try {
+    const res = await fetch(`${SUPABASE_FUNCTIONS}/trigger-invoice`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${ANON_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ pin, month: monthNum, year: _pinYear })
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      showToast(`✓ Invoice ${result.invoiceNumber} created! $${Number(result.totalAmount).toLocaleString('en-AU')}`);
+      loadInvoiceHistory();
+    } else if (result.error === 'Invalid PIN') {
+      showToast('Incorrect PIN — try again');
+    } else if (result.alreadyExists) {
+      showToast(`Invoice already exists: ${result.message}`);
+    } else {
+      showToast(result.message || result.error || 'Invoice failed — check Xero connection');
+    }
+  } catch(e) {
+    showToast('Failed to reach server — check internet connection');
+  }
+}
+
+async function loadInvoiceHistory() {
+  const wrap = document.getElementById('invoice-history');
+  if (!wrap) return;
+
+  const { data: invoices } = await db
+    .from('invoice_log')
+    .select('month, year, total_days, total_amount, xero_invoice_number, xero_invoice_url, status, triggered_by, created_at')
+    .order('year', { ascending: false })
+    .order('month', { ascending: false })
+    .limit(12);
+
+  if (!invoices || invoices.length === 0) { wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = '<div class="sec-label" style="margin-bottom:8px">Invoice History</div>' +
+    invoices.map(inv => `
+      <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:6px">
+        <div style="flex:1">
+          <div style="font-size:13px">${MONTH_NAMES_SHORT[inv.month-1]} ${inv.year}
+            <span style="font-size:10px;color:var(--muted);margin-left:6px">${inv.triggered_by === 'manual' ? '(manual)' : ''}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted)">${inv.total_days} days · $${Number(inv.total_amount).toLocaleString('en-AU',{minimumFractionDigits:2})}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          ${inv.status === 'failed'
+            ? '<span style="font-size:11px;color:var(--red);background:rgba(139,58,42,0.15);padding:2px 8px;border-radius:6px">Failed</span>'
+            : `<span style="font-size:11px;color:var(--muted);background:var(--card2);padding:2px 8px;border-radius:6px">${inv.xero_invoice_number || 'DRAFT'}</span>`
+          }
+          ${inv.xero_invoice_url
+            ? `<a href="${inv.xero_invoice_url}" target="_blank" style="font-size:11px;color:var(--wheat);text-decoration:none">View in Xero →</a>`
+            : ''
+          }
+        </div>
+      </div>`
+    ).join('');
 }
 
 // ── START ────────────────────────────────────────────────────────────────────
