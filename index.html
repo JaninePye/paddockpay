@@ -462,12 +462,16 @@ function joke(type) {
 }
 
 // ── INIT ────────────────────────────────────────────────────────────────────
+const WRITE_TOKEN = '5e3e316ca7c550ba584fbde3869b129adceba84efd107845';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
     detectSessionFromUrl: false
+  },
+  global: {
+    headers: { 'x-paddock-token': WRITE_TOKEN }
   }
 });
 
