@@ -911,20 +911,15 @@ async function loadXeroStatus() {
   }
 }
 
-async function connectXero() {
-  try {
-    const res = await fetch(`${SUPABASE_FUNCTIONS}/xero-auth-url`, {
-      headers: { 'Authorization': `Bearer ${ANON_KEY}` }
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showToast('Could not generate Xero login URL — try again');
-    }
-  } catch(e) {
-    showToast('Connection error — check internet and try again');
-  }
+function connectXero() {
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: '7132D2E0E28B4D3B8F70AB7E2E96B192',
+    redirect_uri: 'https://qfuffybirntwooanvtte.supabase.co/functions/v1/xero-callback',
+    scope: 'openid profile email accounting.transactions accounting.contacts offline_access',
+    state: crypto.randomUUID()
+  });
+  window.location.href = 'https://login.xero.com/identity/connect/authorize?' + params.toString();
 }
 
 async function disconnectXero() {
