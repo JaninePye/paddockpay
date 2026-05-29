@@ -268,6 +268,20 @@
 
   .mark-invoiced-btn:hover { background: rgba(74,124,158,0.2); }
 
+  .delete-btn {
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid rgba(192,57,43,0.4);
+    color: #E87070;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.12s;
+    margin-left: 4px;
+  }
+  .delete-btn:hover { background: rgba(192,57,43,0.2); border-color: rgba(192,57,43,0.7); }
+
   .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -628,9 +642,9 @@
 // ─────────────────────────────────────────────
 //  CONFIGURATION — REPLACE BEFORE DEPLOYING
 // ─────────────────────────────────────────────
-const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY  = 'YOUR_SUPABASE_ANON_KEY';
-const NOTIFY_EMAIL  = 'YOUR_EMAIL@example.com'; // Janine's email for notifications
+const SUPABASE_URL  = 'https://iurtfpgivxzkncqrdxxd.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cnRmcGdpdnh6a25jcXJkeHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTg5MzMsImV4cCI6MjA5NTU3NDkzM30.59fMNiJvzcjVO4mVSR3FyIKOM0W0Xb5hP0lL4Ak18Xg';
+const NOTIFY_EMAIL  = 'janinepye@mail.com';
 
 // ─────────────────────────────────────────────
 //  SUPABASE CLIENT (no SDK — raw fetch)
@@ -681,7 +695,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
   document.getElementById('config-banner').style.display = 'none';
-  loadJobs();
+  updateOnlineStatus();
+  loadJobs().then(() => flushOfflineQueue());
 });
 
 function todayISO() {
@@ -732,9 +747,10 @@ function renderJobs() {
     const rateLabel = j.rate_type === 'km' ? `${j.quantity} km` : `${j.quantity} hrs`;
     const rateUnit  = j.rate_type === 'km' ? '/km' : '/hr';
     const statusClass = j.status === 'Not Invoiced' ? 'not-invoiced' : j.status === 'Invoiced' ? 'invoiced' : 'paid';
-    const actionBtn = j.status === 'Not Invoiced'
+    const invoiceBtn = j.status === 'Not Invoiced'
       ? `<button class="mark-invoiced-btn" onclick="markInvoiced('${j.id}')">Mark Invoiced</button>`
       : '';
+    const deleteBtn = `<button class="delete-btn" onclick="deleteJob('${j.id}')" title="Delete job">✕</button>`;
 
     return `<tr>
       <td class="mono muted">${fmtDate(j.job_date)}</td>
@@ -744,7 +760,7 @@ function renderJobs() {
       <td class="mono muted">${fmtMoney(j.rate)}${rateUnit}</td>
       <td class="mono"><strong>${fmtMoney(total)}</strong></td>
       <td><span class="status-pill ${statusClass}">${j.status}</span></td>
-      <td>${actionBtn}</td>
+      <td style="white-space:nowrap;">${invoiceBtn} ${deleteBtn}</td>
     </tr>`;
   }).join('');
 }
@@ -867,6 +883,18 @@ async function saveJob() {
 
   document.getElementById('save-btn').disabled = true;
 
+  // No signal — queue locally and show in UI immediately
+  if (!navigator.onLine) {
+    const entry = queueOfflineJob(payload);
+    jobs.unshift({ ...payload, id: entry._local_id, _offline: true });
+    renderJobs();
+    updateStats();
+    closeModal();
+    showToast('No signal — job queued. Will sync automatically.');
+    document.getElementById('save-btn').disabled = false;
+    return;
+  }
+
   try {
     const result = await sb.insert(payload);
     jobs.unshift(result[0]);
@@ -876,7 +904,13 @@ async function saveJob() {
     showToast('Job saved. Notification sent to Janine.');
     await sendNotification(payload, total);
   } catch(e) {
-    showToast('Save failed: ' + e.message, true);
+    // Network error mid-attempt — queue it
+    const entry = queueOfflineJob(payload);
+    jobs.unshift({ ...payload, id: entry._local_id, _offline: true });
+    renderJobs();
+    updateStats();
+    closeModal();
+    showToast('Save failed — job queued offline. Will sync when signal returns.');
     document.getElementById('save-btn').disabled = false;
   }
 }
@@ -923,6 +957,102 @@ async function sendNotification(job, total) {
     console.warn('Notification failed (job still saved):', e.message);
   }
 }
+
+// ─────────────────────────────────────────────
+//  DELETE JOB
+// ─────────────────────────────────────────────
+async function deleteJob(id) {
+  if (!confirm('Delete this job? This cannot be undone.')) return;
+
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    jobs = jobs.filter(x => x.id !== id);
+    renderJobs();
+    updateStats();
+    showToast('Job deleted (demo mode).');
+    return;
+  }
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`;
+    const r = await fetch(url, { method: 'DELETE', headers: sb.headers });
+    if (!r.ok) throw new Error(await r.text());
+    jobs = jobs.filter(x => x.id !== id);
+    renderJobs();
+    updateStats();
+    showToast('Job deleted.');
+  } catch(e) {
+    showToast('Delete failed. Check your connection.', true);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  OFFLINE QUEUE
+//  Jobs saved while offline are queued in
+//  localStorage and retried when signal returns.
+// ─────────────────────────────────────────────
+const QUEUE_KEY = 'freightlog_offline_queue';
+
+function queueOfflineJob(payload) {
+  const queue = getQueue();
+  const entry = { ...payload, _queued_at: new Date().toISOString(), _local_id: Date.now().toString() };
+  queue.push(entry);
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  return entry;
+}
+
+function getQueue() {
+  try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch { return []; }
+}
+
+function clearFromQueue(localId) {
+  const queue = getQueue().filter(j => j._local_id !== localId);
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+}
+
+async function flushOfflineQueue() {
+  const queue = getQueue();
+  if (queue.length === 0) return;
+  showToast(`Signal restored. Syncing ${queue.length} queued job${queue.length > 1 ? 's' : ''}...`);
+  let synced = 0;
+  for (const entry of queue) {
+    const { _queued_at, _local_id, ...payload } = entry;
+    try {
+      const result = await sb.insert(payload);
+      // Replace local placeholder with real record
+      jobs = jobs.filter(j => j.id !== _local_id);
+      jobs.unshift(result[0]);
+      clearFromQueue(_local_id);
+      await sendNotification(payload, payload.total);
+      synced++;
+    } catch(e) {
+      console.warn('Queue flush failed for entry:', _local_id, e.message);
+    }
+  }
+  if (synced > 0) {
+    renderJobs();
+    updateStats();
+    showToast(`${synced} job${synced > 1 ? 's' : ''} synced successfully.`);
+  }
+}
+
+// Show offline indicator in header
+function updateOnlineStatus() {
+  let indicator = document.getElementById('offline-indicator');
+  if (!navigator.onLine) {
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'offline-indicator';
+      indicator.style.cssText = 'background:#C4501A;color:#fff;text-align:center;padding:6px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:1px;position:sticky;top:0;z-index:50;';
+      indicator.textContent = '⚠ NO SIGNAL — Jobs will be saved and synced when connection returns';
+      document.body.insertBefore(indicator, document.body.firstChild);
+    }
+  } else {
+    if (indicator) indicator.remove();
+    flushOfflineQueue();
+  }
+}
+
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
 
 // ─────────────────────────────────────────────
 //  FILTER
