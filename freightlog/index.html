@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreightLog — Pye Contracting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #2C1810;
+    --rust: #C4501A;
+    --straw: #E8D5A3;
+    --dust: #F5EDD8;
+    --sky: #4A7C9E;
+    --night: #0F1A12;
+    --grass: #2E5C1E;
+    --grass-light: #4A8C35;
+    --white: #FAFAF7;
+    --grey: #8A8478;
+    --border: #D4C9A8;
+    --danger: #C0392B;
+    --paid: #27AE60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--night);
+    color: var(--white);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(46,92,30,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(196,80,26,0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* HEADER */
+  header {
+    padding: 28px 0 20px;
+    border-bottom: 2px solid var(--rust);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .logo-block { display: flex; flex-direction: column; gap: 2px; }
+
+  .logo-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 8vw, 56px);
+    letter-spacing: 3px;
+    line-height: 1;
+    color: var(--straw);
+  }
+
+  .logo-main span { color: var(--rust); }
+
+  .logo-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--grey);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--grey);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(212,201,168,0.2);
+    border-radius: 4px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--rust);
+  }
+
+  .stat-card.green::before { background: var(--grass-light); }
+  .stat-card.sky::before { background: var(--sky); }
+
+  .stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--grey);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--straw);
+  }
+
+  /* ADD JOB BUTTON */
+  .add-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--rust);
+    border: none;
+    border-radius: 4px;
+    color: var(--white);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .add-btn:hover { background: #d4611f; transform: translateY(-1px); }
+  .add-btn:active { transform: translateY(0); }
+
+  .add-btn .plus {
+    font-size: 28px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  /* FILTERS */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--grey);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 2px;
+    border: 1px solid rgba(212,201,168,0.25);
+    background: transparent;
+    color: var(--grey);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.12s;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-btn:hover { border-color: var(--straw); color: var(--straw); }
+  .filter-btn.active { background: var(--rust); border-color: var(--rust); color: var(--white); }
+
+  /* JOB TABLE */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey);
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(212,201,168,0.2);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(212,201,168,0.08);
+    transition: background 0.1s;
+    cursor: default;
+  }
+
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+  td {
+    padding: 12px 12px;
+    vertical-align: middle;
+    color: var(--straw);
+  }
+
+  td.mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  td.muted { color: var(--grey); font-size: 12px; }
+
+  .status-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .status-pill.not-invoiced { background: rgba(196,80,26,0.2); color: #E8956A; border: 1px solid rgba(196,80,26,0.4); }
+  .status-pill.invoiced { background: rgba(74,124,158,0.2); color: #7BB8D8; border: 1px solid rgba(74,124,158,0.4); }
+  .status-pill.paid { background: rgba(39,174,96,0.2); color: #5DBF85; border: 1px solid rgba(39,174,96,0.4); }
+
+  .mark-invoiced-btn {
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid rgba(74,124,158,0.5);
+    color: #7BB8D8;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.12s;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .mark-invoiced-btn:hover { background: rgba(74,124,158,0.2); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--grey);
+  }
+
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; }
+
+  /* MODAL OVERLAY */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(3px);
+  }
+
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: #1A2B1D;
+    border: 1px solid rgba(212,201,168,0.25);
+    border-top: 3px solid var(--rust);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 480px;
+    padding: 28px;
+    position: relative;
+    animation: slideUp 0.2s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--straw);
+    margin-bottom: 22px;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 20px;
+    background: none;
+    border: none;
+    color: var(--grey);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.12s;
+  }
+
+  .modal-close:hover { color: var(--straw); }
+
+  .field-group { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 6px;
+  }
+
+  label span.required { color: var(--rust); margin-left: 2px; }
+
+  input, select, textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(212,201,168,0.2);
+    border-radius: 3px;
+    color: var(--white);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    transition: border-color 0.12s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--rust);
+    background: rgba(255,255,255,0.08);
+  }
+
+  select option { background: #1A2B1D; color: var(--white); }
+
+  .rate-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .rate-option {
+    padding: 12px;
+    border: 1px solid rgba(212,201,168,0.2);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--grey);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.12s;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .rate-option:hover { border-color: var(--straw); color: var(--straw); }
+  .rate-option.selected { border-color: var(--rust); background: rgba(196,80,26,0.15); color: var(--straw); }
+
+  .rate-option .rate-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(212,201,168,0.15);
+  }
+
+  .btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(212,201,168,0.25);
+    color: var(--grey);
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .btn-cancel:hover { border-color: var(--straw); color: var(--straw); }
+
+  .btn-save {
+    flex: 2;
+    padding: 12px;
+    background: var(--rust);
+    border: none;
+    color: var(--white);
+    border-radius: 3px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .btn-save:hover { background: #d4611f; }
+  .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--grass);
+    border: 1px solid var(--grass-light);
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    z-index: 200;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--danger); border-color: #e74c3c; }
+
+  /* CONFIG NOTICE */
+  .config-banner {
+    background: rgba(196,80,26,0.12);
+    border: 1px solid rgba(196,80,26,0.3);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #E8956A;
+    line-height: 1.7;
+  }
+
+  .config-banner strong { color: var(--straw); display: block; margin-bottom: 4px; letter-spacing: 1px; }
+
+  /* LOADING */
+  .loading-row td {
+    text-align: center;
+    padding: 40px;
+    color: var(--grey);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 600px) {
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .stats-bar .stat-card:last-child { grid-column: 1 / -1; }
+    .field-row { grid-template-columns: 1fr; }
+    thead th:nth-child(4),
+    td:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo-block">
+      <div class="logo-main">FREIGHT<span>LOG</span></div>
+      <div class="logo-sub">Pye Contracting &mdash; Field Entry System</div>
+    </div>
+    <div class="header-meta">
+      <span id="live-date">—</span><br>
+      Dulacca, QLD
+    </div>
+  </header>
+
+  <div class="config-banner" id="config-banner">
+    <strong>⚙ SETUP REQUIRED</strong>
+    Replace the Supabase URL and anon key in the &lt;script&gt; section at the bottom of this file,
+    and set your notification email address. See the setup instructions at the end of this page.
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Jobs This Month</div>
+      <div class="stat-value" id="stat-month">—</div>
+    </div>
+    <div class="stat-card sky">
+      <div class="stat-label">Not Invoiced</div>
+      <div class="stat-value" id="stat-uninvoiced">—</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Revenue This Month</div>
+      <div class="stat-value" id="stat-revenue">—</div>
+    </div>
+  </div>
+
+  <button class="add-btn" onclick="openModal()">
+    <span class="plus">+</span> ADD NEW JOB
+  </button>
+
+  <div class="filter-row">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('Not Invoiced', this)">Not Invoiced</button>
+    <button class="filter-btn" onclick="setFilter('Invoiced', this)">Invoiced</button>
+    <button class="filter-btn" onclick="setFilter('Paid', this)">Paid</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Rate Type</th>
+          <th>Qty / Details</th>
+          <th>Rate</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="job-tbody">
+        <tr class="loading-row"><td colspan="8">Loading jobs...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">New Freight Job</div>
+
+    <div class="field-group">
+      <label>Client Name <span class="required">*</span></label>
+      <input type="text" id="f-client" placeholder="e.g. Smith Grazing" autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <label>Date of Job <span class="required">*</span></label>
+      <input type="date" id="f-date">
+    </div>
+
+    <div class="field-group">
+      <label>Load / Job Description <span class="required">*</span></label>
+      <input type="text" id="f-description" placeholder="e.g. Wheat to Dalby, 2 loads">
+    </div>
+
+    <div class="field-group">
+      <label>Rate Type <span class="required">*</span></label>
+      <div class="rate-toggle">
+        <button class="rate-option" id="btn-km" onclick="selectRate('km')">
+          <span class="rate-icon">📍</span>
+          Per Kilometre
+        </button>
+        <button class="rate-option" id="btn-hr" onclick="selectRate('hr')">
+          <span class="rate-icon">⏱</span>
+          Per Hour
+        </button>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label id="qty-label">Kilometres <span class="required">*</span></label>
+        <input type="number" id="f-qty" placeholder="0" min="0" step="0.1">
+      </div>
+      <div class="field-group">
+        <label id="rate-label">Rate ($ per km) <span class="required">*</span></label>
+        <input type="number" id="f-rate" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Docket # <span style="color:var(--grey);font-size:9px;">(if applicable)</span></label>
+      <input type="text" id="f-docket" placeholder="Leave blank if none">
+    </div>
+
+    <div class="field-group">
+      <label>Notes</label>
+      <input type="text" id="f-notes" placeholder="Any extra detail for invoicing">
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="save-btn" onclick="saveJob()">SAVE JOB</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+//  CONFIGURATION — REPLACE BEFORE DEPLOYING
+// ─────────────────────────────────────────────
+const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY  = 'YOUR_SUPABASE_ANON_KEY';
+const NOTIFY_EMAIL  = 'YOUR_EMAIL@example.com'; // Janine's email for notifications
+
+// ─────────────────────────────────────────────
+//  SUPABASE CLIENT (no SDK — raw fetch)
+// ─────────────────────────────────────────────
+const sb = {
+  headers: {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Prefer': 'return=representation'
+  },
+  async get(filter = '') {
+    const url = `${SUPABASE_URL}/rest/v1/freight_jobs?order=job_date.desc${filter}&select=*`;
+    const r = await fetch(url, { headers: this.headers });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async insert(data) {
+    const url = `${SUPABASE_URL}/rest/v1/freight_jobs`;
+    const r = await fetch(url, { method: 'POST', headers: this.headers, body: JSON.stringify(data) });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async update(id, data) {
+    const url = `${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`;
+    const r = await fetch(url, { method: 'PATCH', headers: this.headers, body: JSON.stringify(data) });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+};
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let jobs = [];
+let activeFilter = 'all';
+let selectedRate = null;
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('f-date').value = todayISO();
+  document.getElementById('live-date').textContent = new Date().toLocaleDateString('en-AU', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    renderDemoJobs();
+    return;
+  }
+  document.getElementById('config-banner').style.display = 'none';
+  loadJobs();
+});
+
+function todayISO() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fmtMoney(n) {
+  if (n == null || n === '') return '—';
+  return '$' + Number(n).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// ─────────────────────────────────────────────
+//  LOAD & RENDER
+// ─────────────────────────────────────────────
+async function loadJobs() {
+  try {
+    jobs = await sb.get();
+    renderJobs();
+    updateStats();
+  } catch(e) {
+    showToast('Could not load jobs: ' + e.message, true);
+    renderError();
+  }
+}
+
+function renderJobs() {
+  const tbody = document.getElementById('job-tbody');
+  const filtered = activeFilter === 'all' ? jobs : jobs.filter(j => j.status === activeFilter);
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="empty-state">
+        <div class="icon">🚛</div>
+        <p>${activeFilter === 'all' ? 'No jobs recorded yet. Hit ADD NEW JOB to start.' : 'No jobs with this status.'}</p>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(j => {
+    const total = j.quantity && j.rate ? (j.quantity * j.rate) : null;
+    const rateLabel = j.rate_type === 'km' ? `${j.quantity} km` : `${j.quantity} hrs`;
+    const rateUnit  = j.rate_type === 'km' ? '/km' : '/hr';
+    const statusClass = j.status === 'Not Invoiced' ? 'not-invoiced' : j.status === 'Invoiced' ? 'invoiced' : 'paid';
+    const actionBtn = j.status === 'Not Invoiced'
+      ? `<button class="mark-invoiced-btn" onclick="markInvoiced('${j.id}')">Mark Invoiced</button>`
+      : '';
+
+    return `<tr>
+      <td class="mono muted">${fmtDate(j.job_date)}</td>
+      <td><strong>${escHtml(j.client_name)}</strong><br><span class="muted" style="font-size:11px;">${escHtml(j.description||'')}</span></td>
+      <td class="mono muted">${j.rate_type === 'km' ? 'Per km' : 'Per hr'}</td>
+      <td class="mono muted">${rateLabel}</td>
+      <td class="mono muted">${fmtMoney(j.rate)}${rateUnit}</td>
+      <td class="mono"><strong>${fmtMoney(total)}</strong></td>
+      <td><span class="status-pill ${statusClass}">${j.status}</span></td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStats() {
+  const now = new Date();
+  const thisMonth = jobs.filter(j => {
+    if (!j.job_date) return false;
+    const d = new Date(j.job_date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  document.getElementById('stat-month').textContent = thisMonth.length;
+  document.getElementById('stat-uninvoiced').textContent = jobs.filter(j => j.status === 'Not Invoiced').length;
+
+  const rev = thisMonth.reduce((sum, j) => sum + (j.quantity && j.rate ? j.quantity * j.rate : 0), 0);
+  document.getElementById('stat-revenue').textContent = rev > 0 ? '$' + rev.toLocaleString('en-AU', {maximumFractionDigits:0}) : '$0';
+}
+
+function renderError() {
+  document.getElementById('job-tbody').innerHTML = `<tr class="loading-row"><td colspan="8">Could not connect. Check your Supabase configuration.</td></tr>`;
+}
+
+// ─────────────────────────────────────────────
+//  DEMO MODE (before Supabase is configured)
+// ─────────────────────────────────────────────
+function renderDemoJobs() {
+  jobs = [
+    { id:'1', job_date:'2026-05-28', client_name:'Smith Grazing', description:'Wheat to Dalby silos', rate_type:'km', quantity:220, rate:3.50, status:'Not Invoiced', docket_number:'WB-4421' },
+    { id:'2', job_date:'2026-05-26', client_name:'Holloway Farms', description:'Sorghum — Tara delivery', rate_type:'hr', quantity:4.5, rate:185, status:'Invoiced', docket_number:'' },
+    { id:'3', job_date:'2026-05-20', client_name:'Cooper Ag', description:'Barley load, Roma', rate_type:'km', quantity:185, rate:3.50, status:'Paid', docket_number:'WB-4398' },
+  ];
+  renderJobs();
+  updateStats();
+}
+
+// ─────────────────────────────────────────────
+//  MODAL
+// ─────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-client').focus();
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  resetModal();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function resetModal() {
+  document.getElementById('f-client').value = '';
+  document.getElementById('f-date').value = todayISO();
+  document.getElementById('f-description').value = '';
+  document.getElementById('f-qty').value = '';
+  document.getElementById('f-rate').value = '';
+  document.getElementById('f-docket').value = '';
+  document.getElementById('f-notes').value = '';
+  selectedRate = null;
+  document.getElementById('btn-km').classList.remove('selected');
+  document.getElementById('btn-hr').classList.remove('selected');
+  document.getElementById('save-btn').disabled = false;
+}
+
+function selectRate(type) {
+  selectedRate = type;
+  document.getElementById('btn-km').classList.toggle('selected', type === 'km');
+  document.getElementById('btn-hr').classList.toggle('selected', type === 'hr');
+  document.getElementById('qty-label').innerHTML = type === 'km'
+    ? 'Kilometres <span class="required">*</span>'
+    : 'Hours <span class="required">*</span>';
+  document.getElementById('rate-label').innerHTML = type === 'km'
+    ? 'Rate ($ per km) <span class="required">*</span>'
+    : 'Rate ($ per hr) <span class="required">*</span>';
+  document.getElementById('f-qty').placeholder = type === 'km' ? '0' : '0.0';
+  document.getElementById('f-rate').step = type === 'km' ? '0.01' : '1';
+}
+
+// ─────────────────────────────────────────────
+//  SAVE JOB
+// ─────────────────────────────────────────────
+async function saveJob() {
+  const client = document.getElementById('f-client').value.trim();
+  const date   = document.getElementById('f-date').value;
+  const desc   = document.getElementById('f-description').value.trim();
+  const qty    = parseFloat(document.getElementById('f-qty').value);
+  const rate   = parseFloat(document.getElementById('f-rate').value);
+
+  if (!client || !date || !desc || !selectedRate || isNaN(qty) || isNaN(rate)) {
+    showToast('Please fill in all required fields and select a rate type.', true);
+    return;
+  }
+
+  const total = (qty * rate).toFixed(2);
+  const payload = {
+    client_name:  client,
+    job_date:     date,
+    description:  desc,
+    rate_type:    selectedRate,
+    quantity:     qty,
+    rate:         rate,
+    total:        parseFloat(total),
+    docket_number: document.getElementById('f-docket').value.trim() || null,
+    notes:        document.getElementById('f-notes').value.trim() || null,
+    status:       'Not Invoiced'
+  };
+
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    // Demo mode — just prepend to local array
+    jobs.unshift({ id: Date.now().toString(), ...payload });
+    renderJobs();
+    updateStats();
+    closeModal();
+    showToast('Job saved (demo mode — not persisted).');
+    return;
+  }
+
+  document.getElementById('save-btn').disabled = true;
+
+  try {
+    const result = await sb.insert(payload);
+    jobs.unshift(result[0]);
+    renderJobs();
+    updateStats();
+    closeModal();
+    showToast('Job saved. Notification sent to Janine.');
+    await sendNotification(payload, total);
+  } catch(e) {
+    showToast('Save failed: ' + e.message, true);
+    document.getElementById('save-btn').disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  MARK INVOICED
+// ─────────────────────────────────────────────
+async function markInvoiced(id) {
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    const j = jobs.find(x => x.id === id);
+    if (j) j.status = 'Invoiced';
+    renderJobs();
+    updateStats();
+    showToast('Marked as invoiced (demo mode).');
+    return;
+  }
+  try {
+    await sb.update(id, { status: 'Invoiced', invoiced_at: new Date().toISOString() });
+    const j = jobs.find(x => x.id === id);
+    if (j) { j.status = 'Invoiced'; j.invoiced_at = new Date().toISOString(); }
+    renderJobs();
+    updateStats();
+    showToast('Marked as invoiced.');
+  } catch(e) {
+    showToast('Update failed: ' + e.message, true);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  EMAIL NOTIFICATION (Supabase Edge Function)
+// ─────────────────────────────────────────────
+async function sendNotification(job, total) {
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/notify-janine`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({
+        to: NOTIFY_EMAIL,
+        subject: `New freight job — ${job.client_name} — $${total}`,
+        job
+      })
+    });
+  } catch(e) {
+    console.warn('Notification failed (job still saved):', e.message);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  FILTER
+// ─────────────────────────────────────────────
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderJobs();
+}
+
+// ─────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════
+     SETUP INSTRUCTIONS (remove before final deployment)
+     ══════════════════════════════════════════════════════
+
+STEP 1 — CREATE SUPABASE PROJECT
+  Go to supabase.com, create a new project (separate from PaddockPay).
+  Name it: pye-freightlog
+
+STEP 2 — CREATE THE DATABASE TABLE
+  In Supabase > SQL Editor, run this:
+
+  CREATE TABLE freight_jobs (
+    id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at    TIMESTAMPTZ DEFAULT now(),
+    job_date      DATE NOT NULL,
+    client_name   TEXT NOT NULL,
+    description   TEXT NOT NULL,
+    rate_type     TEXT NOT NULL CHECK (rate_type IN ('km','hr')),
+    quantity      NUMERIC NOT NULL,
+    rate          NUMERIC NOT NULL,
+    total         NUMERIC NOT NULL,
+    docket_number TEXT,
+    notes         TEXT,
+    status        TEXT NOT NULL DEFAULT 'Not Invoiced' CHECK (status IN ('Not Invoiced','Invoiced','Paid')),
+    invoiced_at   TIMESTAMPTZ
+  );
+
+  -- Allow anonymous read/write (since app has no login)
+  ALTER TABLE freight_jobs ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "allow_all" ON freight_jobs FOR ALL USING (true) WITH CHECK (true);
+
+STEP 3 — GET YOUR CREDENTIALS
+  Supabase > Project Settings > API
+  Copy: Project URL → SUPABASE_URL
+  Copy: anon/public key → SUPABASE_KEY
+
+STEP 4 — EMAIL NOTIFICATIONS
+  Notifications use a Supabase Edge Function.
+  In Supabase > Edge Functions, create a function named: notify-janine
+  Use Resend (resend.com — free tier) to send the email.
+  Basic edge function code available on request.
+
+STEP 5 — UPDATE THIS FILE
+  Replace in the <script> section:
+    YOUR_SUPABASE_URL  → your project URL
+    YOUR_SUPABASE_ANON_KEY → your anon key
+    YOUR_EMAIL@example.com → Janine's email
+
+STEP 6 — DEPLOY TO GITHUB PAGES
+  Add this file to your janinepye.github.io repo as:
+    /freightlog/index.html
+  It will be live at: janinepye.github.io/freightlog
+
+  ══════════════════════════════════════════════════════ -->
+</body>
+</html>
