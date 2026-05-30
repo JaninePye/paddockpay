@@ -8,44 +8,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --soil: #2C1810;
     --rust: #C4501A;
     --straw: #E8D5A3;
-    --dust: #F5EDD8;
     --sky: #4A7C9E;
     --night: #0F1A12;
     --grass: #2E5C1E;
     --grass-light: #4A8C35;
     --white: #FAFAF7;
     --grey: #8A8478;
-    --border: #D4C9A8;
     --danger: #C0392B;
-    --paid: #27AE60;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background: var(--night);
     color: var(--white);
     font-family: 'IBM Plex Sans', sans-serif;
     min-height: 100vh;
-    position: relative;
     overflow-x: hidden;
   }
-
-  /* Background texture */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: 
+    background-image:
       radial-gradient(ellipse at 20% 50%, rgba(46,92,30,0.15) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 20%, rgba(196,80,26,0.08) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
   }
-
   .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 16px 60px; }
 
   /* HEADER */
@@ -58,449 +48,169 @@
     justify-content: space-between;
     gap: 16px;
   }
-
   .logo-block { display: flex; flex-direction: column; gap: 2px; }
-
-  .logo-main {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(36px, 8vw, 56px);
-    letter-spacing: 3px;
-    line-height: 1;
-    color: var(--straw);
-  }
-
+  .logo-main { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px,8vw,56px); letter-spacing: 3px; line-height: 1; color: var(--straw); }
   .logo-main span { color: var(--rust); }
+  .logo-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--grey); letter-spacing: 2px; text-transform: uppercase; }
+  .header-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--grey); text-align: right; line-height: 1.6; }
 
-  .logo-sub {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--grey);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .header-meta {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--grey);
-    text-align: right;
-    line-height: 1.6;
-  }
-
-  /* STATS BAR */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  .stat-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(212,201,168,0.2);
-    border-radius: 4px;
-    padding: 14px 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--rust);
-  }
-
+  /* STATS */
+  .stats-bar { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(212,201,168,0.2); border-radius: 4px; padding: 14px 16px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--rust); }
   .stat-card.green::before { background: var(--grass-light); }
   .stat-card.sky::before { background: var(--sky); }
+  .stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--grey); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; color: var(--straw); }
 
-  .stat-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    color: var(--grey);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .stat-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 1px;
-    color: var(--straw);
-  }
-
-  /* ADD JOB BUTTON */
-  .add-btn {
-    width: 100%;
-    padding: 16px;
-    background: var(--rust);
-    border: none;
-    border-radius: 4px;
-    color: var(--white);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
+  /* ADD BUTTON */
+  .add-btn { width: 100%; padding: 16px; background: var(--rust); border: none; border-radius: 4px; color: var(--white); font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; cursor: pointer; transition: all 0.15s; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .add-btn:hover { background: #d4611f; transform: translateY(-1px); }
   .add-btn:active { transform: translateY(0); }
-
-  .add-btn .plus {
-    font-size: 28px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-weight: 300;
-    line-height: 1;
-  }
+  .add-btn .plus { font-size: 28px; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; line-height: 1; }
 
   /* FILTERS */
-  .filter-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .filter-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--grey);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-right: 4px;
-  }
-
-  .filter-btn {
-    padding: 6px 14px;
-    border-radius: 2px;
-    border: 1px solid rgba(212,201,168,0.25);
-    background: transparent;
-    color: var(--grey);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.12s;
-    letter-spacing: 0.5px;
-  }
-
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--grey); letter-spacing: 1px; text-transform: uppercase; margin-right: 4px; }
+  .filter-btn { padding: 6px 14px; border-radius: 2px; border: 1px solid rgba(212,201,168,0.25); background: transparent; color: var(--grey); font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.12s; letter-spacing: 0.5px; }
   .filter-btn:hover { border-color: var(--straw); color: var(--straw); }
   .filter-btn.active { background: var(--rust); border-color: var(--rust); color: var(--white); }
 
-  /* JOB TABLE */
-  .table-wrap { overflow-x: auto; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  thead th {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--grey);
-    padding: 10px 12px;
-    text-align: left;
-    border-bottom: 1px solid rgba(212,201,168,0.2);
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(212,201,168,0.08);
-    transition: background 0.1s;
-    cursor: default;
-  }
-
+  /* TABLE */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(212,201,168,0.2); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(212,201,168,0.08); transition: background 0.1s; }
   tbody tr:hover { background: rgba(255,255,255,0.03); }
-
-  td {
-    padding: 12px 12px;
-    vertical-align: middle;
-    color: var(--straw);
-  }
-
-  td.mono {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-  }
-
+  td { padding: 10px 12px; vertical-align: middle; color: var(--straw); }
+  td.mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
   td.muted { color: var(--grey); font-size: 12px; }
 
-  .status-pill {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 2px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-weight: 500;
+  /* Mobile card layout — replaces table rows on small screens */
+  @media (max-width: 600px) {
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .stats-bar .stat-card:last-child { grid-column: 1 / -1; }
+    .table-wrap { overflow-x: visible; }
+    table, thead, tbody, tr, th, td { display: block; }
+    thead { display: none; }
+    tbody tr {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(212,201,168,0.12);
+      border-radius: 4px;
+      margin-bottom: 10px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 12px;
+    }
+    td { padding: 0; font-size: 12px; border: none; }
+    td::before {
+      content: attr(data-label);
+      display: block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: var(--grey);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    td.td-client { grid-column: 1 / -1; }
+    td.td-actions { grid-column: 1 / -1; display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(212,201,168,0.1); margin-top: 4px; }
   }
 
+  /* STATUS PILLS */
+  .status-pill { display: inline-block; padding: 3px 10px; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
   .status-pill.not-invoiced { background: rgba(196,80,26,0.2); color: #E8956A; border: 1px solid rgba(196,80,26,0.4); }
   .status-pill.invoiced { background: rgba(74,124,158,0.2); color: #7BB8D8; border: 1px solid rgba(74,124,158,0.4); }
   .status-pill.paid { background: rgba(39,174,96,0.2); color: #5DBF85; border: 1px solid rgba(39,174,96,0.4); }
 
-  .mark-invoiced-btn {
-    padding: 4px 10px;
-    background: transparent;
-    border: 1px solid rgba(74,124,158,0.5);
-    color: #7BB8D8;
-    border-radius: 2px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.12s;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-
+  /* ACTION BUTTONS */
+  .mark-invoiced-btn { padding: 4px 10px; background: transparent; border: 1px solid rgba(74,124,158,0.5); color: #7BB8D8; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.12s; letter-spacing: 0.5px; white-space: nowrap; }
   .mark-invoiced-btn:hover { background: rgba(74,124,158,0.2); }
+  .edit-btn { padding: 4px 10px; background: transparent; border: 1px solid rgba(212,201,168,0.3); color: var(--straw); border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+  .edit-btn:hover { background: rgba(212,201,168,0.1); }
+  .delete-btn { padding: 4px 8px; background: transparent; border: 1px solid rgba(192,57,43,0.4); color: #E87070; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.12s; }
+  .delete-btn:hover { background: rgba(192,57,43,0.2); }
 
-  .delete-btn {
-    padding: 4px 8px;
-    background: transparent;
-    border: 1px solid rgba(192,57,43,0.4);
-    color: #E87070;
-    border-radius: 2px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.12s;
-    margin-left: 4px;
-  }
-  .delete-btn:hover { background: rgba(192,57,43,0.2); border-color: rgba(192,57,43,0.7); }
-
-  .empty-state {
+  /* PHOTO UPLOAD */
+  .photo-upload-area {
+    border: 2px dashed rgba(212,201,168,0.25);
+    border-radius: 4px;
+    padding: 16px;
     text-align: center;
-    padding: 60px 20px;
-    color: var(--grey);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    margin-bottom: 16px;
   }
+  .photo-upload-area:hover { border-color: var(--rust); background: rgba(196,80,26,0.05); }
+  .photo-upload-area.has-photo { border-color: var(--grass-light); background: rgba(46,92,30,0.08); }
+  .photo-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .photo-upload-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--grey); letter-spacing: 1px; pointer-events: none; }
+  .photo-upload-label .icon { font-size: 24px; display: block; margin-bottom: 6px; }
+  .photo-preview { max-width: 100%; max-height: 160px; border-radius: 3px; display: block; margin: 0 auto 8px; object-fit: contain; }
+  .photo-remove-btn { background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.4); color: #E87070; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 10px; cursor: pointer; position: relative; z-index: 2; }
+  .photo-remove-btn:hover { background: rgba(192,57,43,0.35); }
 
+  /* DOCKET PHOTO in job row */
+  .photo-btn { padding: 4px 8px; background: transparent; border: 1px solid rgba(74,124,158,0.4); color: #7BB8D8; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+  .photo-btn:hover { background: rgba(74,124,158,0.15); }
+  .photo-btn.has-photo { border-color: var(--grass-light); color: #5DBF85; }
+
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--grey); }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
   .empty-state p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; }
 
-  /* MODAL OVERLAY */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    backdrop-filter: blur(3px);
-  }
-
+  /* MODAL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(3px); overflow-y: auto; }
   .overlay.open { display: flex; }
-
-  .modal {
-    background: #1A2B1D;
-    border: 1px solid rgba(212,201,168,0.25);
-    border-top: 3px solid var(--rust);
-    border-radius: 4px;
-    width: 100%;
-    max-width: 480px;
-    padding: 28px;
-    position: relative;
-    animation: slideUp 0.2s ease;
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .modal-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 2px;
-    color: var(--straw);
-    margin-bottom: 22px;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: none;
-    border: none;
-    color: var(--grey);
-    font-size: 22px;
-    cursor: pointer;
-    line-height: 1;
-    transition: color 0.12s;
-  }
-
+  .modal { background: #1A2B1D; border: 1px solid rgba(212,201,168,0.25); border-top: 3px solid var(--rust); border-radius: 4px; width: 100%; max-width: 480px; padding: 28px; position: relative; animation: slideUp 0.2s ease; margin: auto; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--straw); margin-bottom: 22px; }
+  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--grey); font-size: 22px; cursor: pointer; line-height: 1; transition: color 0.12s; }
   .modal-close:hover { color: var(--straw); }
-
-  .field-group { margin-bottom: 18px; }
-
-  label {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--grey);
-    margin-bottom: 6px;
-  }
-
+  .field-group { margin-bottom: 16px; }
+  label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); margin-bottom: 6px; }
   label span.required { color: var(--rust); margin-left: 2px; }
-
-  input, select, textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(212,201,168,0.2);
-    border-radius: 3px;
-    color: var(--white);
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
-    padding: 10px 12px;
-    transition: border-color 0.12s;
-    outline: none;
-    -webkit-appearance: none;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--rust);
-    background: rgba(255,255,255,0.08);
-  }
-
+  input, select { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(212,201,168,0.2); border-radius: 3px; color: var(--white); font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; padding: 10px 12px; transition: border-color 0.12s; outline: none; -webkit-appearance: none; }
+  input:focus, select:focus { border-color: var(--rust); background: rgba(255,255,255,0.08); }
   select option { background: #1A2B1D; color: var(--white); }
 
-  .rate-toggle {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-
-  .rate-option {
-    padding: 12px;
-    border: 1px solid rgba(212,201,168,0.2);
-    border-radius: 3px;
-    background: transparent;
-    color: var(--grey);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.12s;
-    text-align: center;
-    letter-spacing: 0.5px;
-  }
-
+  /* RATE TOGGLE — 3 options */
+  .rate-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .rate-option { padding: 10px 6px; border: 1px solid rgba(212,201,168,0.2); border-radius: 3px; background: transparent; color: var(--grey); font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.12s; text-align: center; letter-spacing: 0.3px; }
   .rate-option:hover { border-color: var(--straw); color: var(--straw); }
   .rate-option.selected { border-color: var(--rust); background: rgba(196,80,26,0.15); color: var(--straw); }
-
-  .rate-option .rate-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .rate-option .rate-icon { font-size: 18px; display: block; margin-bottom: 4px; }
 
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
-  .modal-footer {
-    display: flex;
-    gap: 10px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(212,201,168,0.15);
-  }
+  /* CLIENT DATALIST WRAPPER */
+  .input-wrap { position: relative; }
+  datalist { display: none; }
 
-  .btn-cancel {
-    flex: 1;
-    padding: 12px;
-    background: transparent;
-    border: 1px solid rgba(212,201,168,0.25);
-    color: var(--grey);
-    border-radius: 3px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.12s;
-  }
-
+  .modal-footer { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(212,201,168,0.15); }
+  .btn-cancel { flex: 1; padding: 12px; background: transparent; border: 1px solid rgba(212,201,168,0.25); color: var(--grey); border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; transition: all 0.12s; }
   .btn-cancel:hover { border-color: var(--straw); color: var(--straw); }
-
-  .btn-save {
-    flex: 2;
-    padding: 12px;
-    background: var(--rust);
-    border: none;
-    color: var(--white);
-    border-radius: 3px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.12s;
-  }
-
+  .btn-save { flex: 2; padding: 12px; background: var(--rust); border: none; color: var(--white); border-radius: 3px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; cursor: pointer; transition: all 0.12s; }
   .btn-save:hover { background: #d4611f; }
   .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
 
   /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--grass);
-    border: 1px solid var(--grass-light);
-    color: var(--white);
-    padding: 12px 24px;
-    border-radius: 3px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 1px;
-    z-index: 200;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-  }
-
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--grass); border: 1px solid var(--grass-light); color: var(--white); padding: 12px 24px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; z-index: 200; transition: transform 0.3s ease; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: var(--danger); border-color: #e74c3c; }
 
-  /* CONFIG NOTICE */
-  .config-banner {
-    background: rgba(196,80,26,0.12);
-    border: 1px solid rgba(196,80,26,0.3);
-    border-radius: 4px;
-    padding: 14px 16px;
-    margin-bottom: 20px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: #E8956A;
-    line-height: 1.7;
-  }
-
+  /* CONFIG BANNER */
+  .config-banner { background: rgba(196,80,26,0.12); border: 1px solid rgba(196,80,26,0.3); border-radius: 4px; padding: 14px 16px; margin-bottom: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #E8956A; line-height: 1.7; }
   .config-banner strong { color: var(--straw); display: block; margin-bottom: 4px; letter-spacing: 1px; }
+  .loading-row td { text-align: center; padding: 40px; color: var(--grey); font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; }
 
-  /* LOADING */
-  .loading-row td {
-    text-align: center;
-    padding: 40px;
-    color: var(--grey);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 1px;
-  }
-
-  @media (max-width: 600px) {
-    .stats-bar { grid-template-columns: 1fr 1fr; }
-    .stats-bar .stat-card:last-child { grid-column: 1 / -1; }
-    .field-row { grid-template-columns: 1fr; }
-    thead th:nth-child(4),
-    td:nth-child(4) { display: none; }
+  @media (max-width: 400px) {
+    .field-row-3 { grid-template-columns: 1fr 1fr; }
+    .field-row-3 .field-group:last-child { grid-column: 1 / -1; }
   }
 </style>
 </head>
@@ -520,8 +230,7 @@
 
   <div class="config-banner" id="config-banner">
     <strong>⚙ SETUP REQUIRED</strong>
-    Replace the Supabase URL and anon key in the &lt;script&gt; section at the bottom of this file,
-    and set your notification email address. See the setup instructions at the end of this page.
+    Replace the Supabase URL and anon key in the &lt;script&gt; section, and set your notification email address.
   </div>
 
   <div class="stats-bar">
@@ -545,10 +254,10 @@
 
   <div class="filter-row">
     <span class="filter-label">Filter:</span>
-    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-    <button class="filter-btn" onclick="setFilter('Not Invoiced', this)">Not Invoiced</button>
-    <button class="filter-btn" onclick="setFilter('Invoiced', this)">Invoiced</button>
-    <button class="filter-btn" onclick="setFilter('Paid', this)">Paid</button>
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('Not Invoiced',this)">Not Invoiced</button>
+    <button class="filter-btn" onclick="setFilter('Invoiced',this)">Invoiced</button>
+    <button class="filter-btn" onclick="setFilter('Paid',this)">Paid</button>
   </div>
 
   <div class="table-wrap">
@@ -557,8 +266,8 @@
         <tr>
           <th>Date</th>
           <th>Client</th>
-          <th>Rate Type</th>
-          <th>Qty / Details</th>
+          <th>Type</th>
+          <th>Qty</th>
           <th>Rate</th>
           <th>Total</th>
           <th>Status</th>
@@ -570,18 +279,22 @@
       </tbody>
     </table>
   </div>
-
 </div>
 
 <!-- MODAL -->
 <div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">×</button>
-    <div class="modal-title">New Freight Job</div>
+    <div class="modal-title" id="modal-title">New Freight Job</div>
+
+    <input type="hidden" id="f-edit-id">
 
     <div class="field-group">
       <label>Client Name <span class="required">*</span></label>
-      <input type="text" id="f-client" placeholder="e.g. Smith Grazing" autocomplete="off">
+      <div class="input-wrap">
+        <input type="text" id="f-client" placeholder="e.g. Smith Grazing" autocomplete="off" list="client-list">
+        <datalist id="client-list"></datalist>
+      </div>
     </div>
 
     <div class="field-group">
@@ -598,24 +311,50 @@
       <label>Rate Type <span class="required">*</span></label>
       <div class="rate-toggle">
         <button class="rate-option" id="btn-km" onclick="selectRate('km')">
-          <span class="rate-icon">📍</span>
-          Per Kilometre
+          <span class="rate-icon">📍</span>Per Km
         </button>
         <button class="rate-option" id="btn-hr" onclick="selectRate('hr')">
-          <span class="rate-icon">⏱</span>
-          Per Hour
+          <span class="rate-icon">⏱</span>Per Hour
+        </button>
+        <button class="rate-option" id="btn-deck" onclick="selectRate('deck')">
+          <span class="rate-icon">🚛</span>Per Deck
         </button>
       </div>
     </div>
 
-    <div class="field-row">
-      <div class="field-group">
-        <label id="qty-label">Kilometres <span class="required">*</span></label>
-        <input type="number" id="f-qty" placeholder="0" min="0" step="0.1">
+    <!-- KM / HR fields -->
+    <div id="fields-km-hr" style="display:none;">
+      <div class="field-row">
+        <div class="field-group">
+          <label id="qty-label">Kilometres <span class="required">*</span></label>
+          <input type="number" id="f-qty" placeholder="0" min="0" step="0.1">
+        </div>
+        <div class="field-group">
+          <label id="rate-label">Rate ($/km) <span class="required">*</span></label>
+          <input type="number" id="f-rate" placeholder="0.00" min="0" step="0.01">
+        </div>
       </div>
-      <div class="field-group">
-        <label id="rate-label">Rate ($ per km) <span class="required">*</span></label>
-        <input type="number" id="f-rate" placeholder="0.00" min="0" step="0.01">
+    </div>
+
+    <!-- DECK fields -->
+    <div id="fields-deck" style="display:none;">
+      <div class="field-row-3">
+        <div class="field-group">
+          <label>Decks <span class="required">*</span></label>
+          <input type="number" id="f-decks" placeholder="0" min="1" step="1">
+        </div>
+        <div class="field-group">
+          <label>Kilometres <span class="required">*</span></label>
+          <input type="number" id="f-deck-km" placeholder="0" min="0" step="0.1">
+        </div>
+        <div class="field-group">
+          <label>Rate ($/deck/km) <span class="required">*</span></label>
+          <input type="number" id="f-deck-rate" placeholder="0.00" min="0" step="0.001">
+        </div>
+      </div>
+      <div class="field-group" style="margin-top:4px;">
+        <label>Calculated Total</label>
+        <input type="text" id="f-deck-total-display" readonly placeholder="—" style="background:rgba(255,255,255,0.02);color:var(--straw);font-family:'IBM Plex Mono',monospace;">
       </div>
     </div>
 
@@ -629,6 +368,17 @@
       <input type="text" id="f-notes" placeholder="Any extra detail for invoicing">
     </div>
 
+    <div class="field-group">
+      <label>Docket Photo <span style="color:var(--grey);font-size:9px;">(optional — take photo or upload)</span></label>
+      <div class="photo-upload-area" id="photo-upload-area">
+        <input type="file" id="f-photo" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+        <div class="photo-upload-label" id="photo-upload-label">
+          <span class="icon">📷</span>
+          Tap to take photo or choose file
+        </div>
+      </div>
+    </div>
+
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="btn-save" id="save-btn" onclick="saveJob()">SAVE JOB</button>
@@ -640,14 +390,14 @@
 
 <script>
 // ─────────────────────────────────────────────
-//  CONFIGURATION — REPLACE BEFORE DEPLOYING
+//  CONFIGURATION
 // ─────────────────────────────────────────────
-const SUPABASE_URL  = 'https://iurtfpgivxzkncqrdxxd.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cnRmcGdpdnh6a25jcXJkeHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTg5MzMsImV4cCI6MjA5NTU3NDkzM30.59fMNiJvzcjVO4mVSR3FyIKOM0W0Xb5hP0lL4Ak18Xg';
-const NOTIFY_EMAIL  = 'janinepye@mail.com';
+const SUPABASE_URL = 'https://iurtfpgivxzkncqrdxxd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cnRmcGdpdnh6a25jcXJkeHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTg5MzMsImV4cCI6MjA5NTU3NDkzM30.59fMNiJvzcjVO4mVSR3FyIKOM0W0Xb5hP0lL4Ak18Xg';
+const NOTIFY_EMAIL = 'janinepye@mail.com';
 
 // ─────────────────────────────────────────────
-//  SUPABASE CLIENT (no SDK — raw fetch)
+//  SUPABASE CLIENT
 // ─────────────────────────────────────────────
 const sb = {
   headers: {
@@ -656,24 +406,25 @@ const sb = {
     'Authorization': `Bearer ${SUPABASE_KEY}`,
     'Prefer': 'return=representation'
   },
-  async get(filter = '') {
-    const url = `${SUPABASE_URL}/rest/v1/freight_jobs?order=job_date.desc${filter}&select=*`;
-    const r = await fetch(url, { headers: this.headers });
+  async get(filter='') {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs?order=job_date.desc${filter}&select=*`, { headers: this.headers });
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   },
   async insert(data) {
-    const url = `${SUPABASE_URL}/rest/v1/freight_jobs`;
-    const r = await fetch(url, { method: 'POST', headers: this.headers, body: JSON.stringify(data) });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs`, { method:'POST', headers: this.headers, body: JSON.stringify(data) });
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   },
   async update(id, data) {
-    const url = `${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`;
-    const r = await fetch(url, { method: 'PATCH', headers: this.headers, body: JSON.stringify(data) });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`, { method:'PATCH', headers: this.headers, body: JSON.stringify(data) });
     if (!r.ok) throw new Error(await r.text());
     return r.json();
-  }
+  },
+  async delete(id) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`, { method:'DELETE', headers: this.headers });
+    if (!r.ok) throw new Error(await r.text());
+  },
 };
 
 // ─────────────────────────────────────────────
@@ -682,6 +433,26 @@ const sb = {
 let jobs = [];
 let activeFilter = 'all';
 let selectedRate = null;
+let editingId = null;
+let pendingPhotoFile = null;   // File object waiting to be attached to notification email
+
+// Client contact cache — saved to localStorage
+const CLIENTS_KEY = 'freightlog_clients';
+function getClients() {
+  try { return JSON.parse(localStorage.getItem(CLIENTS_KEY) || '[]'); } catch { return []; }
+}
+function saveClient(name) {
+  const clients = getClients();
+  if (name && !clients.includes(name)) {
+    clients.push(name);
+    clients.sort();
+    localStorage.setItem(CLIENTS_KEY, JSON.stringify(clients));
+  }
+}
+function populateClientList() {
+  const dl = document.getElementById('client-list');
+  dl.innerHTML = getClients().map(c => `<option value="${escHtml(c)}">`).join('');
+}
 
 // ─────────────────────────────────────────────
 //  INIT
@@ -689,29 +460,31 @@ let selectedRate = null;
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('f-date').value = todayISO();
   document.getElementById('live-date').textContent = new Date().toLocaleDateString('en-AU', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  populateClientList();
+
+  // Live deck total calculation
+  ['f-decks','f-deck-km','f-deck-rate'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateDeckTotal);
+  });
 
   if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-    renderDemoJobs();
-    return;
+    renderDemoJobs(); return;
   }
   document.getElementById('config-banner').style.display = 'none';
   updateOnlineStatus();
   loadJobs().then(() => flushOfflineQueue());
 });
 
-function todayISO() {
-  return new Date().toISOString().split('T')[0];
-}
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+function fmtMoney(n) { if (n==null||n==='') return '—'; return '$'+Number(n).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
-function fmtDate(iso) {
-  if (!iso) return '—';
-  const [y,m,d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function fmtMoney(n) {
-  if (n == null || n === '') return '—';
-  return '$' + Number(n).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
+function updateDeckTotal() {
+  const decks = parseFloat(document.getElementById('f-decks').value) || 0;
+  const km    = parseFloat(document.getElementById('f-deck-km').value) || 0;
+  const rate  = parseFloat(document.getElementById('f-deck-rate').value) || 0;
+  const total = decks * km * rate;
+  document.getElementById('f-deck-total-display').value = (decks && km && rate) ? fmtMoney(total) : '—';
 }
 
 // ─────────────────────────────────────────────
@@ -720,12 +493,32 @@ function fmtMoney(n) {
 async function loadJobs() {
   try {
     jobs = await sb.get();
-    renderJobs();
-    updateStats();
+    renderJobs(); updateStats();
   } catch(e) {
-    showToast('Could not load jobs: ' + e.message, true);
+    showToast('Could not load jobs.', true);
     renderError();
   }
+}
+
+function rateTypeLabel(j) {
+  if (j.rate_type === 'km')   return 'Per km';
+  if (j.rate_type === 'hr')   return 'Per hr';
+  if (j.rate_type === 'deck') return 'Per deck';
+  return j.rate_type;
+}
+
+function qtyLabel(j) {
+  if (j.rate_type === 'km')   return `${j.quantity} km`;
+  if (j.rate_type === 'hr')   return `${j.quantity} hrs`;
+  if (j.rate_type === 'deck') return `${j.deck_count} deck × ${j.quantity} km`;
+  return j.quantity;
+}
+
+function rateUnitLabel(j) {
+  if (j.rate_type === 'km')   return '/km';
+  if (j.rate_type === 'hr')   return '/hr';
+  if (j.rate_type === 'deck') return '/deck/km';
+  return '';
 }
 
 function renderJobs() {
@@ -733,81 +526,108 @@ function renderJobs() {
   const filtered = activeFilter === 'all' ? jobs : jobs.filter(j => j.status === activeFilter);
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8">
-      <div class="empty-state">
-        <div class="icon">🚛</div>
-        <p>${activeFilter === 'all' ? 'No jobs recorded yet. Hit ADD NEW JOB to start.' : 'No jobs with this status.'}</p>
-      </div>
-    </td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="icon">🚛</div><p>${activeFilter==='all'?'No jobs recorded yet. Hit ADD NEW JOB to start.':'No jobs with this status.'}</p></div></td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(j => {
-    const total = j.quantity && j.rate ? (j.quantity * j.rate) : null;
-    const rateLabel = j.rate_type === 'km' ? `${j.quantity} km` : `${j.quantity} hrs`;
-    const rateUnit  = j.rate_type === 'km' ? '/km' : '/hr';
+    const total = j.total || (j.quantity && j.rate ? j.quantity * j.rate : null);
     const statusClass = j.status === 'Not Invoiced' ? 'not-invoiced' : j.status === 'Invoiced' ? 'invoiced' : 'paid';
-    const invoiceBtn = j.status === 'Not Invoiced'
-      ? `<button class="mark-invoiced-btn" onclick="markInvoiced('${j.id}')">Mark Invoiced</button>`
-      : '';
-    const deleteBtn = `<button class="delete-btn" onclick="deleteJob('${j.id}')" title="Delete job">✕</button>`;
+    const invoiceBtn = j.status === 'Not Invoiced' ? `<button class="mark-invoiced-btn" onclick="markInvoiced('${j.id}')">Invoice</button>` : '';
+    const editBtn    = `<button class="edit-btn" onclick="openEdit('${j.id}')">Edit</button>`;
+    const deleteBtn  = `<button class="delete-btn" onclick="deleteJob('${j.id}')">✕</button>`;
+    const photoBtn = j.photo_path === 'sent'
+      ? `<span class="photo-btn has-photo" title="Docket photo was emailed to Janine" style="cursor:default;">📷 Sent</span>`
+      : `<span class="photo-btn" title="No photo attached" style="opacity:0.35;cursor:default;">📷</span>`;
 
     return `<tr>
-      <td class="mono muted">${fmtDate(j.job_date)}</td>
-      <td><strong>${escHtml(j.client_name)}</strong><br><span class="muted" style="font-size:11px;">${escHtml(j.description||'')}</span></td>
-      <td class="mono muted">${j.rate_type === 'km' ? 'Per km' : 'Per hr'}</td>
-      <td class="mono muted">${rateLabel}</td>
-      <td class="mono muted">${fmtMoney(j.rate)}${rateUnit}</td>
-      <td class="mono"><strong>${fmtMoney(total)}</strong></td>
-      <td><span class="status-pill ${statusClass}">${j.status}</span></td>
-      <td style="white-space:nowrap;">${invoiceBtn} ${deleteBtn}</td>
+      <td class="mono muted" data-label="Date">${fmtDate(j.job_date)}</td>
+      <td class="td-client" data-label="Client"><strong>${escHtml(j.client_name)}</strong><br><span style="color:var(--grey);font-size:11px;">${escHtml(j.description||'')}</span></td>
+      <td class="mono muted" data-label="Type">${rateTypeLabel(j)}</td>
+      <td class="mono muted" data-label="Qty">${qtyLabel(j)}</td>
+      <td class="mono muted" data-label="Rate">${fmtMoney(j.rate)}${rateUnitLabel(j)}</td>
+      <td class="mono" data-label="Total"><strong>${fmtMoney(total)}</strong></td>
+      <td data-label="Status"><span class="status-pill ${statusClass}">${j.status}</span></td>
+      <td class="td-actions" data-label="">${invoiceBtn} ${photoBtn} ${editBtn} ${deleteBtn}</td>
     </tr>`;
   }).join('');
 }
 
 function updateStats() {
   const now = new Date();
-  const thisMonth = jobs.filter(j => {
-    if (!j.job_date) return false;
-    const d = new Date(j.job_date);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
-
+  const thisMonth = jobs.filter(j => { if (!j.job_date) return false; const d=new Date(j.job_date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
   document.getElementById('stat-month').textContent = thisMonth.length;
-  document.getElementById('stat-uninvoiced').textContent = jobs.filter(j => j.status === 'Not Invoiced').length;
-
-  const rev = thisMonth.reduce((sum, j) => sum + (j.quantity && j.rate ? j.quantity * j.rate : 0), 0);
-  document.getElementById('stat-revenue').textContent = rev > 0 ? '$' + rev.toLocaleString('en-AU', {maximumFractionDigits:0}) : '$0';
+  document.getElementById('stat-uninvoiced').textContent = jobs.filter(j=>j.status==='Not Invoiced').length;
+  const rev = thisMonth.reduce((s,j)=>s+(j.total||0),0);
+  document.getElementById('stat-revenue').textContent = '$'+rev.toLocaleString('en-AU',{maximumFractionDigits:0});
 }
 
 function renderError() {
   document.getElementById('job-tbody').innerHTML = `<tr class="loading-row"><td colspan="8">Could not connect. Check your Supabase configuration.</td></tr>`;
 }
 
-// ─────────────────────────────────────────────
-//  DEMO MODE (before Supabase is configured)
-// ─────────────────────────────────────────────
 function renderDemoJobs() {
   jobs = [
-    { id:'1', job_date:'2026-05-28', client_name:'Smith Grazing', description:'Wheat to Dalby silos', rate_type:'km', quantity:220, rate:3.50, status:'Not Invoiced', docket_number:'WB-4421' },
-    { id:'2', job_date:'2026-05-26', client_name:'Holloway Farms', description:'Sorghum — Tara delivery', rate_type:'hr', quantity:4.5, rate:185, status:'Invoiced', docket_number:'' },
-    { id:'3', job_date:'2026-05-20', client_name:'Cooper Ag', description:'Barley load, Roma', rate_type:'km', quantity:185, rate:3.50, status:'Paid', docket_number:'WB-4398' },
+    { id:'1', job_date:'2026-05-28', client_name:'Smith Grazing', description:'Wheat to Dalby silos', rate_type:'km', quantity:220, rate:3.50, total:770, status:'Not Invoiced', docket_number:'WB-4421' },
+    { id:'2', job_date:'2026-05-26', client_name:'Holloway Farms', description:'Sorghum — Tara delivery', rate_type:'hr', quantity:4.5, rate:185, total:832.50, status:'Invoiced', docket_number:'' },
+    { id:'3', job_date:'2026-05-20', client_name:'Cooper Ag', description:'Cattle — Roma', rate_type:'deck', quantity:180, rate:0.85, deck_count:3, total:459, status:'Paid', docket_number:'' },
   ];
-  renderJobs();
-  updateStats();
+  renderJobs(); updateStats();
 }
 
 // ─────────────────────────────────────────────
-//  MODAL
+//  MODAL — OPEN / CLOSE / RESET
 // ─────────────────────────────────────────────
 function openModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'New Freight Job';
+  document.getElementById('save-btn').textContent = 'SAVE JOB';
+  resetModal();
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('f-client').focus();
+}
+
+function openEdit(id) {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit Job';
+  document.getElementById('save-btn').textContent = 'UPDATE JOB';
+  resetModal();
+
+  document.getElementById('f-client').value      = j.client_name || '';
+  document.getElementById('f-date').value        = j.job_date || '';
+  document.getElementById('f-description').value = j.description || '';
+  document.getElementById('f-docket').value      = j.docket_number || '';
+  document.getElementById('f-notes').value       = j.notes || '';
+
+  if (j.rate_type === 'deck') {
+    selectRate('deck');
+    document.getElementById('f-decks').value     = j.deck_count || '';
+    document.getElementById('f-deck-km').value   = j.quantity || '';
+    document.getElementById('f-deck-rate').value = j.rate || '';
+    updateDeckTotal();
+  } else {
+    selectRate(j.rate_type);
+    document.getElementById('f-qty').value  = j.quantity || '';
+    document.getElementById('f-rate').value = j.rate || '';
+  }
+
+  // Show photo sent indicator if flagged
+  const area  = document.getElementById('photo-upload-area');
+  const label = document.getElementById('photo-upload-label');
+  if (j.photo_path === 'sent') {
+    area.classList.add('has-photo');
+    label.innerHTML = `<span class="icon">✅</span><span style="font-size:11px;color:var(--grass-light);">Photo previously sent to Janine</span><br><span style="font-size:10px;color:var(--grey);">Select a new photo to resend</span>`;
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
 }
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   resetModal();
+  editingId = null;
 }
 
 function handleOverlayClick(e) {
@@ -815,102 +635,239 @@ function handleOverlayClick(e) {
 }
 
 function resetModal() {
-  document.getElementById('f-client').value = '';
-  document.getElementById('f-date').value = todayISO();
-  document.getElementById('f-description').value = '';
-  document.getElementById('f-qty').value = '';
-  document.getElementById('f-rate').value = '';
-  document.getElementById('f-docket').value = '';
-  document.getElementById('f-notes').value = '';
+  document.getElementById('f-edit-id').value      = '';
+  document.getElementById('f-client').value       = '';
+  document.getElementById('f-date').value         = todayISO();
+  document.getElementById('f-description').value  = '';
+  document.getElementById('f-qty').value          = '';
+  document.getElementById('f-rate').value         = '';
+  document.getElementById('f-decks').value        = '';
+  document.getElementById('f-deck-km').value      = '';
+  document.getElementById('f-deck-rate').value    = '';
+  document.getElementById('f-deck-total-display').value = '';
+  document.getElementById('f-docket').value       = '';
+  document.getElementById('f-notes').value        = '';
   selectedRate = null;
-  document.getElementById('btn-km').classList.remove('selected');
-  document.getElementById('btn-hr').classList.remove('selected');
+  ['btn-km','btn-hr','btn-deck'].forEach(id => document.getElementById(id).classList.remove('selected'));
+  document.getElementById('fields-km-hr').style.display = 'none';
+  document.getElementById('fields-deck').style.display  = 'none';
   document.getElementById('save-btn').disabled = false;
-}
-
-function selectRate(type) {
-  selectedRate = type;
-  document.getElementById('btn-km').classList.toggle('selected', type === 'km');
-  document.getElementById('btn-hr').classList.toggle('selected', type === 'hr');
-  document.getElementById('qty-label').innerHTML = type === 'km'
-    ? 'Kilometres <span class="required">*</span>'
-    : 'Hours <span class="required">*</span>';
-  document.getElementById('rate-label').innerHTML = type === 'km'
-    ? 'Rate ($ per km) <span class="required">*</span>'
-    : 'Rate ($ per hr) <span class="required">*</span>';
-  document.getElementById('f-qty').placeholder = type === 'km' ? '0' : '0.0';
-  document.getElementById('f-rate').step = type === 'km' ? '0.01' : '1';
+  populateClientList();
+  // Reset photo field
+  pendingPhotoFile = null;
+  document.getElementById('f-photo').value = '';
+  const area = document.getElementById('photo-upload-area');
+  area.classList.remove('has-photo');
+  document.getElementById('photo-upload-label').innerHTML = '<span class="icon">📷</span>Tap to take photo or choose file';
 }
 
 // ─────────────────────────────────────────────
-//  SAVE JOB
+//  PHOTO HANDLING
+//  Photo is attached to the notification email
+//  sent to Janine. Not stored in Supabase.
+//  DB records photo_sent: true as a flag only.
+// ─────────────────────────────────────────────
+function handlePhotoSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  // 8MB ceiling — Resend email attachment limit is 10MB; base64 adds ~33% overhead
+  const MAX_BYTES = 8 * 1024 * 1024;
+  if (file.size > MAX_BYTES) {
+    showToast('Photo is too large (max 8MB). Please use a lower resolution or compress the image.', true);
+    event.target.value = '';
+    return;
+  }
+  pendingPhotoFile = file;
+  const area  = document.getElementById('photo-upload-area');
+  const label = document.getElementById('photo-upload-label');
+  area.classList.add('has-photo');
+  const reader = new FileReader();
+  reader.onload = e => {
+    label.innerHTML = `<img src="${e.target.result}" class="photo-preview"><span style="font-size:10px;color:var(--grass-light);">✓ Photo ready — ${file.name}</span><br><button class="photo-remove-btn" onclick="removePhoto(event)">Remove</button>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(e) {
+  e.stopPropagation();
+  pendingPhotoFile = null;
+  document.getElementById('f-photo').value = '';
+  const area = document.getElementById('photo-upload-area');
+  area.classList.remove('has-photo');
+  document.getElementById('photo-upload-label').innerHTML = '<span class="icon">📷</span>Tap to take photo or choose file';
+}
+
+// Convert file to base64 for email attachment
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  RATE TYPE SELECTION
+// ─────────────────────────────────────────────
+function selectRate(type) {
+  selectedRate = type;
+  ['btn-km','btn-hr','btn-deck'].forEach(id => document.getElementById(id).classList.remove('selected'));
+  document.getElementById(`btn-${type}`).classList.add('selected');
+
+  document.getElementById('fields-km-hr').style.display  = (type === 'km' || type === 'hr') ? 'block' : 'none';
+  document.getElementById('fields-deck').style.display   = type === 'deck' ? 'block' : 'none';
+
+  if (type === 'km') {
+    document.getElementById('qty-label').innerHTML  = 'Kilometres <span class="required">*</span>';
+    document.getElementById('rate-label').innerHTML = 'Rate ($/km) <span class="required">*</span>';
+    document.getElementById('f-qty').placeholder    = '0';
+    document.getElementById('f-qty').step           = '0.1';
+    document.getElementById('f-rate').step          = '0.01';
+  } else if (type === 'hr') {
+    document.getElementById('qty-label').innerHTML  = 'Hours <span class="required">*</span>';
+    document.getElementById('rate-label').innerHTML = 'Rate ($/hr) <span class="required">*</span>';
+    document.getElementById('f-qty').placeholder    = '0.0';
+    document.getElementById('f-qty').step           = '0.25';
+    document.getElementById('f-rate').step          = '1';
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SAVE / UPDATE JOB
 // ─────────────────────────────────────────────
 async function saveJob() {
   const client = document.getElementById('f-client').value.trim();
   const date   = document.getElementById('f-date').value;
   const desc   = document.getElementById('f-description').value.trim();
-  const qty    = parseFloat(document.getElementById('f-qty').value);
-  const rate   = parseFloat(document.getElementById('f-rate').value);
 
-  if (!client || !date || !desc || !selectedRate || isNaN(qty) || isNaN(rate)) {
+  if (!client || !date || !desc || !selectedRate) {
     showToast('Please fill in all required fields and select a rate type.', true);
     return;
   }
 
-  const total = (qty * rate).toFixed(2);
+  let quantity, rate, total, deck_count = null;
+
+  if (selectedRate === 'deck') {
+    deck_count = parseInt(document.getElementById('f-decks').value);
+    quantity   = parseFloat(document.getElementById('f-deck-km').value);
+    rate       = parseFloat(document.getElementById('f-deck-rate').value);
+    if (isNaN(deck_count) || isNaN(quantity) || isNaN(rate) || deck_count < 1) {
+      showToast('Please fill in decks, kilometres, and rate.', true);
+      return;
+    }
+    total = deck_count * quantity * rate;
+  } else {
+    quantity = parseFloat(document.getElementById('f-qty').value);
+    rate     = parseFloat(document.getElementById('f-rate').value);
+    if (isNaN(quantity) || isNaN(rate)) {
+      showToast('Please fill in quantity and rate.', true);
+      return;
+    }
+    total = quantity * rate;
+  }
+
   const payload = {
-    client_name:  client,
-    job_date:     date,
-    description:  desc,
-    rate_type:    selectedRate,
-    quantity:     qty,
-    rate:         rate,
-    total:        parseFloat(total),
+    client_name:   client,
+    job_date:      date,
+    description:   desc,
+    rate_type:     selectedRate,
+    quantity:      quantity,
+    rate:          rate,
+    deck_count:    deck_count,
+    total:         parseFloat(total.toFixed(2)),
     docket_number: document.getElementById('f-docket').value.trim() || null,
-    notes:        document.getElementById('f-notes').value.trim() || null,
-    status:       'Not Invoiced'
+    notes:         document.getElementById('f-notes').value.trim() || null,
   };
 
+  if (!editingId) payload.status = 'Not Invoiced';
+
+  saveClient(client);
+
   if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-    // Demo mode — just prepend to local array
-    jobs.unshift({ id: Date.now().toString(), ...payload });
-    renderJobs();
-    updateStats();
-    closeModal();
-    showToast('Job saved (demo mode — not persisted).');
+    if (editingId) {
+      const idx = jobs.findIndex(x => x.id === editingId);
+      if (idx > -1) jobs[idx] = { ...jobs[idx], ...payload };
+    } else {
+      jobs.unshift({ id: Date.now().toString(), ...payload });
+    }
+    renderJobs(); updateStats(); closeModal();
+    showToast(editingId ? 'Job updated (demo mode).' : 'Job saved (demo mode).');
     return;
   }
 
   document.getElementById('save-btn').disabled = true;
 
-  // No signal — queue locally and show in UI immediately
-  if (!navigator.onLine) {
+  if (!editingId && !navigator.onLine) {
     const entry = queueOfflineJob(payload);
     jobs.unshift({ ...payload, id: entry._local_id, _offline: true });
-    renderJobs();
-    updateStats();
-    closeModal();
+    renderJobs(); updateStats(); closeModal();
     showToast('No signal — job queued. Will sync automatically.');
     document.getElementById('save-btn').disabled = false;
     return;
   }
 
   try {
-    const result = await sb.insert(payload);
-    jobs.unshift(result[0]);
-    renderJobs();
-    updateStats();
-    closeModal();
-    showToast('Job saved. Notification sent to Janine.');
-    await sendNotification(payload, total);
+    if (editingId) {
+      const result = await sb.update(editingId, payload);
+      const idx = jobs.findIndex(x => x.id === editingId);
+      const updatedJob = result[0] || { ...jobs[idx], ...payload };
+      // If new photo selected during edit — resend notification with photo
+      if (pendingPhotoFile) {
+        try {
+          const photoBase64 = await fileToBase64(pendingPhotoFile);
+          const photoMime   = pendingPhotoFile.type || 'image/jpeg';
+          const photoName   = pendingPhotoFile.name || 'docket.jpg';
+          await sb.update(editingId, { photo_path: 'sent' });
+          updatedJob.photo_path = 'sent';
+          if (idx > -1) jobs[idx] = updatedJob;
+          renderJobs(); updateStats(); closeModal();
+          showToast('Job updated. Photo sent to Janine.');
+          await sendNotification(payload, updatedJob.total, photoBase64, photoMime, photoName);
+        } catch(e) {
+          console.warn('Photo encode failed:', e.message);
+          if (idx > -1) jobs[idx] = updatedJob;
+          renderJobs(); updateStats(); closeModal();
+          showToast('Job updated but photo could not be sent.', true);
+        }
+      } else {
+        if (idx > -1) jobs[idx] = updatedJob;
+        renderJobs(); updateStats(); closeModal();
+        showToast('Job updated.');
+      }
+    } else {
+      const result = await sb.insert(payload);
+      const newJob = result[0];
+      // Attach photo to notification email and flag in DB
+      let photoBase64 = null;
+      let photoMime   = null;
+      let photoName   = null;
+      if (pendingPhotoFile) {
+        try {
+          photoBase64 = await fileToBase64(pendingPhotoFile);
+          photoMime   = pendingPhotoFile.type || 'image/jpeg';
+          photoName   = pendingPhotoFile.name || 'docket.jpg';
+          await sb.update(newJob.id, { photo_path: 'sent' });
+          newJob.photo_path = 'sent';
+        } catch(e) {
+          console.warn('Photo encode failed:', e.message);
+          showToast('Job saved but photo could not be attached. Try editing the job to resend.', true);
+        }
+      }
+      jobs.unshift(newJob);
+      renderJobs(); updateStats(); closeModal();
+      showToast('Job saved. Notification sent to Janine.');
+      await sendNotification(payload, total.toFixed(2), photoBase64, photoMime, photoName);
+    }
   } catch(e) {
-    // Network error mid-attempt — queue it
-    const entry = queueOfflineJob(payload);
-    jobs.unshift({ ...payload, id: entry._local_id, _offline: true });
-    renderJobs();
-    updateStats();
-    closeModal();
-    showToast('Save failed — job queued offline. Will sync when signal returns.');
+    if (!editingId) {
+      const entry = queueOfflineJob(payload);
+      jobs.unshift({ ...payload, id: entry._local_id, _offline: true });
+      renderJobs(); updateStats(); closeModal();
+      showToast('Save failed — job queued offline.');
+    } else {
+      showToast('Update failed. Check your connection.', true);
+    }
     document.getElementById('save-btn').disabled = false;
   }
 }
@@ -920,42 +877,15 @@ async function saveJob() {
 // ─────────────────────────────────────────────
 async function markInvoiced(id) {
   if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-    const j = jobs.find(x => x.id === id);
-    if (j) j.status = 'Invoiced';
-    renderJobs();
-    updateStats();
-    showToast('Marked as invoiced (demo mode).');
-    return;
+    const j = jobs.find(x=>x.id===id); if(j) j.status='Invoiced';
+    renderJobs(); updateStats(); showToast('Marked as invoiced (demo mode).'); return;
   }
   try {
-    await sb.update(id, { status: 'Invoiced', invoiced_at: new Date().toISOString() });
-    const j = jobs.find(x => x.id === id);
-    if (j) { j.status = 'Invoiced'; j.invoiced_at = new Date().toISOString(); }
-    renderJobs();
-    updateStats();
-    showToast('Marked as invoiced.');
-  } catch(e) {
-    showToast('Update failed: ' + e.message, true);
-  }
-}
-
-// ─────────────────────────────────────────────
-//  EMAIL NOTIFICATION (Supabase Edge Function)
-// ─────────────────────────────────────────────
-async function sendNotification(job, total) {
-  try {
-    await fetch(`${SUPABASE_URL}/functions/v1/notify-janine`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({
-        to: NOTIFY_EMAIL,
-        subject: `New freight job — ${job.client_name} — $${total}`,
-        job
-      })
-    });
-  } catch(e) {
-    console.warn('Notification failed (job still saved):', e.message);
-  }
+    await sb.update(id, { status:'Invoiced', invoiced_at: new Date().toISOString() });
+    const j = jobs.find(x=>x.id===id);
+    if(j) { j.status='Invoiced'; j.invoiced_at=new Date().toISOString(); }
+    renderJobs(); updateStats(); showToast('Marked as invoiced.');
+  } catch(e) { showToast('Update failed.', true); }
 }
 
 // ─────────────────────────────────────────────
@@ -963,34 +893,40 @@ async function sendNotification(job, total) {
 // ─────────────────────────────────────────────
 async function deleteJob(id) {
   if (!confirm('Delete this job? This cannot be undone.')) return;
-
   if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-    jobs = jobs.filter(x => x.id !== id);
-    renderJobs();
-    updateStats();
-    showToast('Job deleted (demo mode).');
-    return;
+    jobs = jobs.filter(x=>x.id!==id); renderJobs(); updateStats(); showToast('Job deleted (demo mode).'); return;
   }
   try {
-    const url = `${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`;
-    const r = await fetch(url, { method: 'DELETE', headers: sb.headers });
-    if (!r.ok) throw new Error(await r.text());
-    jobs = jobs.filter(x => x.id !== id);
-    renderJobs();
-    updateStats();
-    showToast('Job deleted.');
-  } catch(e) {
-    showToast('Delete failed. Check your connection.', true);
-  }
+    await sb.delete(id);
+    jobs = jobs.filter(x=>x.id!==id); renderJobs(); updateStats(); showToast('Job deleted.');
+  } catch(e) { showToast('Delete failed.', true); }
+}
+
+// ─────────────────────────────────────────────
+//  EMAIL NOTIFICATION
+// ─────────────────────────────────────────────
+async function sendNotification(job, total, photoBase64=null, photoMime=null, photoName=null) {
+  try {
+    const body = {
+      to:      NOTIFY_EMAIL,
+      subject: `New freight job — ${job.client_name} — $${total}`,
+      job
+    };
+    if (photoBase64) {
+      body.attachment = { data: photoBase64, mime: photoMime, name: photoName };
+    }
+    await fetch(`${SUPABASE_URL}/functions/v1/notify-janine`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify(body)
+    });
+  } catch(e) { console.warn('Notification failed:', e.message); }
 }
 
 // ─────────────────────────────────────────────
 //  OFFLINE QUEUE
-//  Jobs saved while offline are queued in
-//  localStorage and retried when signal returns.
 // ─────────────────────────────────────────────
 const QUEUE_KEY = 'freightlog_offline_queue';
-
 function queueOfflineJob(payload) {
   const queue = getQueue();
   const entry = { ...payload, _queued_at: new Date().toISOString(), _local_id: Date.now().toString() };
@@ -998,59 +934,43 @@ function queueOfflineJob(payload) {
   localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
   return entry;
 }
-
-function getQueue() {
-  try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch { return []; }
-}
-
+function getQueue() { try { return JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]'); } catch { return []; } }
 function clearFromQueue(localId) {
-  const queue = getQueue().filter(j => j._local_id !== localId);
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(getQueue().filter(j=>j._local_id!==localId)));
 }
-
 async function flushOfflineQueue() {
   const queue = getQueue();
   if (queue.length === 0) return;
-  showToast(`Signal restored. Syncing ${queue.length} queued job${queue.length > 1 ? 's' : ''}...`);
+  showToast(`Signal restored. Syncing ${queue.length} queued job${queue.length>1?'s':''}...`);
   let synced = 0;
   for (const entry of queue) {
     const { _queued_at, _local_id, ...payload } = entry;
     try {
       const result = await sb.insert(payload);
-      // Replace local placeholder with real record
-      jobs = jobs.filter(j => j.id !== _local_id);
+      jobs = jobs.filter(j=>j.id!==_local_id);
       jobs.unshift(result[0]);
       clearFromQueue(_local_id);
       await sendNotification(payload, payload.total);
       synced++;
-    } catch(e) {
-      console.warn('Queue flush failed for entry:', _local_id, e.message);
-    }
+    } catch(e) { console.warn('Queue flush failed:', e.message); }
   }
-  if (synced > 0) {
-    renderJobs();
-    updateStats();
-    showToast(`${synced} job${synced > 1 ? 's' : ''} synced successfully.`);
-  }
+  if (synced > 0) { renderJobs(); updateStats(); showToast(`${synced} job${synced>1?'s':''} synced.`); }
 }
-
-// Show offline indicator in header
 function updateOnlineStatus() {
-  let indicator = document.getElementById('offline-indicator');
+  let ind = document.getElementById('offline-indicator');
   if (!navigator.onLine) {
-    if (!indicator) {
-      indicator = document.createElement('div');
-      indicator.id = 'offline-indicator';
-      indicator.style.cssText = 'background:#C4501A;color:#fff;text-align:center;padding:6px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:1px;position:sticky;top:0;z-index:50;';
-      indicator.textContent = '⚠ NO SIGNAL — Jobs will be saved and synced when connection returns';
-      document.body.insertBefore(indicator, document.body.firstChild);
+    if (!ind) {
+      ind = document.createElement('div');
+      ind.id = 'offline-indicator';
+      ind.style.cssText = 'background:#C4501A;color:#fff;text-align:center;padding:6px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:1px;position:sticky;top:0;z-index:50;';
+      ind.textContent = '⚠ NO SIGNAL — Jobs will be saved and synced when connection returns';
+      document.body.insertBefore(ind, document.body.firstChild);
     }
   } else {
-    if (indicator) indicator.remove();
+    if (ind) ind.remove();
     flushOfflineQueue();
   }
 }
-
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
@@ -1059,7 +979,7 @@ window.addEventListener('offline', updateOnlineStatus);
 // ─────────────────────────────────────────────
 function setFilter(f, btn) {
   activeFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderJobs();
 }
@@ -1067,12 +987,12 @@ function setFilter(f, btn) {
 // ─────────────────────────────────────────────
 //  TOAST
 // ─────────────────────────────────────────────
-function showToast(msg, isError = false) {
+function showToast(msg, isError=false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
+  t.className = 'toast' + (isError?' error':'');
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+  setTimeout(()=>t.classList.remove('show'), 3500);
 }
 
 // ─────────────────────────────────────────────
@@ -1085,58 +1005,22 @@ function escHtml(s) {
 </script>
 
 <!-- ══════════════════════════════════════════════════════
-     SETUP INSTRUCTIONS (remove before final deployment)
-     ══════════════════════════════════════════════════════
+DATABASE MIGRATION — run this in Supabase SQL Editor:
 
-STEP 1 — CREATE SUPABASE PROJECT
-  Go to supabase.com, create a new project (separate from PaddockPay).
-  Name it: pye-freightlog
+-- Add deck support + photo path column
+ALTER TABLE freight_jobs
+  ADD COLUMN IF NOT EXISTS deck_count INTEGER,
+  ADD COLUMN IF NOT EXISTS photo_path TEXT,
+  ALTER COLUMN rate_type TYPE TEXT;
 
-STEP 2 — CREATE THE DATABASE TABLE
-  In Supabase > SQL Editor, run this:
+ALTER TABLE freight_jobs
+  DROP CONSTRAINT IF EXISTS freight_jobs_rate_type_check;
 
-  CREATE TABLE freight_jobs (
-    id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    created_at    TIMESTAMPTZ DEFAULT now(),
-    job_date      DATE NOT NULL,
-    client_name   TEXT NOT NULL,
-    description   TEXT NOT NULL,
-    rate_type     TEXT NOT NULL CHECK (rate_type IN ('km','hr')),
-    quantity      NUMERIC NOT NULL,
-    rate          NUMERIC NOT NULL,
-    total         NUMERIC NOT NULL,
-    docket_number TEXT,
-    notes         TEXT,
-    status        TEXT NOT NULL DEFAULT 'Not Invoiced' CHECK (status IN ('Not Invoiced','Invoiced','Paid')),
-    invoiced_at   TIMESTAMPTZ
-  );
+ALTER TABLE freight_jobs
+  ADD CONSTRAINT freight_jobs_rate_type_check CHECK (rate_type IN ('km','hr','deck'));
 
-  -- Allow anonymous read/write (since app has no login)
-  ALTER TABLE freight_jobs ENABLE ROW LEVEL SECURITY;
-  CREATE POLICY "allow_all" ON freight_jobs FOR ALL USING (true) WITH CHECK (true);
-
-STEP 3 — GET YOUR CREDENTIALS
-  Supabase > Project Settings > API
-  Copy: Project URL → SUPABASE_URL
-  Copy: anon/public key → SUPABASE_KEY
-
-STEP 4 — EMAIL NOTIFICATIONS
-  Notifications use a Supabase Edge Function.
-  In Supabase > Edge Functions, create a function named: notify-janine
-  Use Resend (resend.com — free tier) to send the email.
-  Basic edge function code available on request.
-
-STEP 5 — UPDATE THIS FILE
-  Replace in the <script> section:
-    YOUR_SUPABASE_URL  → your project URL
-    YOUR_SUPABASE_ANON_KEY → your anon key
-    YOUR_EMAIL@example.com → Janine's email
-
-STEP 6 — DEPLOY TO GITHUB PAGES
-  Add this file to your janinepye.github.io repo as:
-    /freightlog/index.html
-  It will be live at: janinepye.github.io/freightlog
-
-  ══════════════════════════════════════════════════════ -->
+-- photo_path stores 'sent' as a flag when a photo was emailed to Janine.
+-- No Supabase storage bucket required for photo functionality.
+══════════════════════════════════════════════════════ -->
 </body>
 </html>
