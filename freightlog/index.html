@@ -152,6 +152,17 @@
   .photo-remove-btn { background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.4); color: #E87070; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 10px; cursor: pointer; position: relative; z-index: 2; }
   .photo-remove-btn:hover { background: rgba(192,57,43,0.35); }
 
+  /* PHOTO VIEWER MODAL */
+  .photo-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; align-items: center; justify-content: center; padding: 16px; flex-direction: column; gap: 16px; }
+  .photo-overlay.open { display: flex; }
+  .photo-overlay img { max-width: 100%; max-height: 75vh; border-radius: 4px; object-fit: contain; box-shadow: 0 4px 40px rgba(0,0,0,0.5); }
+  .photo-overlay-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .photo-dl-btn { padding: 10px 20px; background: var(--grass); border: none; color: var(--white); border-radius: 3px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .photo-del-btn { padding: 10px 20px; background: transparent; border: 1px solid rgba(192,57,43,0.5); color: #E87070; border-radius: 3px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; }
+  .photo-del-btn:hover { background: rgba(192,57,43,0.2); }
+  .photo-close-btn { padding: 10px 20px; background: transparent; border: 1px solid rgba(212,201,168,0.25); color: var(--grey); border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; }
+  .photo-overlay-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--grey); letter-spacing: 1px; text-align: center; }
+
   /* DOCKET PHOTO in job row */
   .photo-btn { padding: 4px 8px; background: transparent; border: 1px solid rgba(74,124,158,0.4); color: #7BB8D8; border-radius: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
   .photo-btn:hover { background: rgba(74,124,158,0.15); }
@@ -386,6 +397,17 @@
   </div>
 </div>
 
+<!-- PHOTO VIEWER MODAL -->
+<div class="photo-overlay" id="photo-overlay">
+  <div class="photo-overlay-title" id="photo-overlay-title">Docket Photo</div>
+  <img id="photo-overlay-img" src="" alt="Docket photo">
+  <div class="photo-overlay-actions">
+    <a class="photo-dl-btn" id="photo-dl-btn" download="docket.jpg">⬇ Download</a>
+    <button class="photo-del-btn" onclick="deleteStoredPhoto()">✕ Delete Photo</button>
+    <button class="photo-close-btn" onclick="closePhotoViewer()">Close</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -394,7 +416,6 @@
 // ─────────────────────────────────────────────
 const SUPABASE_URL = 'https://iurtfpgivxzkncqrdxxd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cnRmcGdpdnh6a25jcXJkeHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTg5MzMsImV4cCI6MjA5NTU3NDkzM30.59fMNiJvzcjVO4mVSR3FyIKOM0W0Xb5hP0lL4Ak18Xg';
-const NOTIFY_EMAIL = 'janinepye@mail.com';
 
 // ─────────────────────────────────────────────
 //  SUPABASE CLIENT
@@ -425,6 +446,35 @@ const sb = {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`, { method:'DELETE', headers: this.headers });
     if (!r.ok) throw new Error(await r.text());
   },
+  async uploadPhoto(jobId, file) {
+    const ext  = file.name.split('.').pop() || 'jpg';
+    const path = `dockets/${jobId}.${ext}`;
+    const r = await fetch(`${SUPABASE_URL}/storage/v1/object/freight-dockets/${path}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if (!r.ok) throw new Error(await r.text());
+    return path;
+  },
+  getPhotoUrl(path) {
+    return `${SUPABASE_URL}/storage/v1/object/public/freight-dockets/${path}`;
+  },
+  async deleteStoragePhoto(path) {
+    const r = await fetch(`${SUPABASE_URL}/storage/v1/object/freight-dockets/${path}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!r.ok) throw new Error(await r.text());
+  }
 };
 
 // ─────────────────────────────────────────────
@@ -434,7 +484,8 @@ let jobs = [];
 let activeFilter = 'all';
 let selectedRate = null;
 let editingId = null;
-let pendingPhotoFile = null;   // File object waiting to be attached to notification email
+let pendingPhotoFile   = null;  // File object waiting to be uploaded to Supabase Storage
+let viewingPhotoJobId = null;  // Job ID whose photo is open in viewer
 
 // Client contact cache — saved to localStorage
 const CLIENTS_KEY = 'freightlog_clients';
@@ -536,9 +587,9 @@ function renderJobs() {
     const invoiceBtn = j.status === 'Not Invoiced' ? `<button class="mark-invoiced-btn" onclick="markInvoiced('${j.id}')">Invoice</button>` : '';
     const editBtn    = `<button class="edit-btn" onclick="openEdit('${j.id}')">Edit</button>`;
     const deleteBtn  = `<button class="delete-btn" onclick="deleteJob('${j.id}')">✕</button>`;
-    const photoBtn = j.photo_path === 'sent'
-      ? `<span class="photo-btn has-photo" title="Docket photo was emailed to Janine" style="cursor:default;">📷 Sent</span>`
-      : `<span class="photo-btn" title="No photo attached" style="opacity:0.35;cursor:default;">📷</span>`;
+    const photoBtn = j.photo_path
+      ? `<button class="photo-btn has-photo" onclick="openPhotoViewer('${j.id}')" title="View docket photo">📷</button>`
+      : `<button class="photo-btn" onclick="openEdit('${j.id}')" title="No photo — tap Edit to add one" style="opacity:0.35;">📷</button>`;
 
     return `<tr>
       <td class="mono muted" data-label="Date">${fmtDate(j.job_date)}</td>
@@ -613,12 +664,13 @@ function openEdit(id) {
     document.getElementById('f-rate').value = j.rate || '';
   }
 
-  // Show photo sent indicator if flagged
+  // Show existing photo from storage if present
   const area  = document.getElementById('photo-upload-area');
   const label = document.getElementById('photo-upload-label');
-  if (j.photo_path === 'sent') {
+  if (j.photo_path) {
+    const url = sb.getPhotoUrl(j.photo_path);
     area.classList.add('has-photo');
-    label.innerHTML = `<span class="icon">✅</span><span style="font-size:11px;color:var(--grass-light);">Photo previously sent to Janine</span><br><span style="font-size:10px;color:var(--grey);">Select a new photo to resend</span>`;
+    label.innerHTML = `<img src="${url}" class="photo-preview"><span style="font-size:10px;color:var(--grass-light);">✓ Photo attached — select a new one to replace</span>`;
   }
 
   document.getElementById('modal-overlay').classList.add('open');
@@ -663,17 +715,17 @@ function resetModal() {
 
 // ─────────────────────────────────────────────
 //  PHOTO HANDLING
-//  Photo is attached to the notification email
-//  sent to Janine. Not stored in Supabase.
-//  DB records photo_sent: true as a flag only.
+//  Photos stored in Supabase Storage bucket:
+//  freight-dockets (public bucket)
+//  Janine views and downloads from the app.
 // ─────────────────────────────────────────────
 function handlePhotoSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
-  // 8MB ceiling — Resend email attachment limit is 10MB; base64 adds ~33% overhead
+  // 8MB ceiling
   const MAX_BYTES = 8 * 1024 * 1024;
   if (file.size > MAX_BYTES) {
-    showToast('Photo is too large (max 8MB). Please use a lower resolution or compress the image.', true);
+    showToast('Photo is too large (max 8MB). Please reduce image size and try again.', true);
     event.target.value = '';
     return;
   }
@@ -697,15 +749,54 @@ function removePhoto(e) {
   document.getElementById('photo-upload-label').innerHTML = '<span class="icon">📷</span>Tap to take photo or choose file';
 }
 
-// Convert file to base64 for email attachment
-async function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload  = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+async function uploadPendingPhoto(jobId) {
+  if (!pendingPhotoFile) return null;
+  try {
+    const path = await sb.uploadPhoto(jobId, pendingPhotoFile);
+    await sb.update(jobId, { photo_path: path });
+    return path;
+  } catch(e) {
+    console.warn('Photo upload failed:', e.message);
+    showToast('Job saved but photo upload failed. Try editing the job to re-attach.', true);
+    return null;
+  }
 }
+
+function openPhotoViewer(jobId) {
+  const j = jobs.find(x => x.id === jobId);
+  if (!j || !j.photo_path) return;
+  viewingPhotoJobId = jobId;
+  const url = sb.getPhotoUrl(j.photo_path);
+  document.getElementById('photo-overlay-img').src = url;
+  document.getElementById('photo-dl-btn').href     = url;
+  document.getElementById('photo-dl-btn').download = `docket_${j.client_name}_${j.job_date}.jpg`;
+  document.getElementById('photo-overlay-title').textContent = `${j.client_name} — ${fmtDate(j.job_date)}`;
+  document.getElementById('photo-overlay').classList.add('open');
+}
+
+function closePhotoViewer() {
+  document.getElementById('photo-overlay').classList.remove('open');
+  document.getElementById('photo-overlay-img').src = '';
+  viewingPhotoJobId = null;
+}
+
+async function deleteStoredPhoto() {
+  if (!viewingPhotoJobId) return;
+  const j = jobs.find(x => x.id === viewingPhotoJobId);
+  if (!j || !j.photo_path) return;
+  if (!confirm('Delete this docket photo from storage? This cannot be undone.')) return;
+  try {
+    await sb.deleteStoragePhoto(j.photo_path);
+    await sb.update(j.id, { photo_path: null });
+    j.photo_path = null;
+    closePhotoViewer();
+    renderJobs();
+    showToast('Photo deleted from storage.');
+  } catch(e) {
+    showToast('Delete failed. Try again.', true);
+  }
+}
+
 
 // ─────────────────────────────────────────────
 //  RATE TYPE SELECTION
@@ -812,52 +903,37 @@ async function saveJob() {
       const result = await sb.update(editingId, payload);
       const idx = jobs.findIndex(x => x.id === editingId);
       const updatedJob = result[0] || { ...jobs[idx], ...payload };
-      // If new photo selected during edit — resend notification with photo
+      // Upload new photo to storage if selected during edit
       if (pendingPhotoFile) {
         try {
-          const photoBase64 = await fileToBase64(pendingPhotoFile);
-          const photoMime   = pendingPhotoFile.type || 'image/jpeg';
-          const photoName   = pendingPhotoFile.name || 'docket.jpg';
-          await sb.update(editingId, { photo_path: 'sent' });
-          updatedJob.photo_path = 'sent';
-          if (idx > -1) jobs[idx] = updatedJob;
-          renderJobs(); updateStats(); closeModal();
-          showToast('Job updated. Photo sent to Janine.');
-          await sendNotification(payload, updatedJob.total, photoBase64, photoMime, photoName);
+          const path = await sb.uploadPhoto(editingId, pendingPhotoFile);
+          await sb.update(editingId, { photo_path: path });
+          updatedJob.photo_path = path;
         } catch(e) {
-          console.warn('Photo encode failed:', e.message);
-          if (idx > -1) jobs[idx] = updatedJob;
-          renderJobs(); updateStats(); closeModal();
-          showToast('Job updated but photo could not be sent.', true);
+          console.warn('Photo upload failed:', e.message);
+          showToast('Job updated but photo upload failed.', true);
         }
-      } else {
-        if (idx > -1) jobs[idx] = updatedJob;
-        renderJobs(); updateStats(); closeModal();
-        showToast('Job updated.');
       }
+      if (idx > -1) jobs[idx] = updatedJob;
+      renderJobs(); updateStats(); closeModal();
+      showToast('Job updated.');
     } else {
       const result = await sb.insert(payload);
       const newJob = result[0];
-      // Attach photo to notification email and flag in DB
-      let photoBase64 = null;
-      let photoMime   = null;
-      let photoName   = null;
+      // Upload photo to Supabase Storage if selected
       if (pendingPhotoFile) {
         try {
-          photoBase64 = await fileToBase64(pendingPhotoFile);
-          photoMime   = pendingPhotoFile.type || 'image/jpeg';
-          photoName   = pendingPhotoFile.name || 'docket.jpg';
-          await sb.update(newJob.id, { photo_path: 'sent' });
-          newJob.photo_path = 'sent';
+          const path = await sb.uploadPhoto(newJob.id, pendingPhotoFile);
+          await sb.update(newJob.id, { photo_path: path });
+          newJob.photo_path = path;
         } catch(e) {
-          console.warn('Photo encode failed:', e.message);
-          showToast('Job saved but photo could not be attached. Try editing the job to resend.', true);
+          console.warn('Photo upload failed:', e.message);
+          showToast('Job saved but photo upload failed. Edit the job to re-attach.', true);
         }
       }
       jobs.unshift(newJob);
       renderJobs(); updateStats(); closeModal();
-      showToast('Job saved. Notification sent to Janine.');
-      await sendNotification(payload, total.toFixed(2), photoBase64, photoMime, photoName);
+      showToast('Job saved successfully.');
     }
   } catch(e) {
     if (!editingId) {
@@ -902,26 +978,7 @@ async function deleteJob(id) {
   } catch(e) { showToast('Delete failed.', true); }
 }
 
-// ─────────────────────────────────────────────
-//  EMAIL NOTIFICATION
-// ─────────────────────────────────────────────
-async function sendNotification(job, total, photoBase64=null, photoMime=null, photoName=null) {
-  try {
-    const body = {
-      to:      NOTIFY_EMAIL,
-      subject: `New freight job — ${job.client_name} — $${total}`,
-      job
-    };
-    if (photoBase64) {
-      body.attachment = { data: photoBase64, mime: photoMime, name: photoName };
-    }
-    await fetch(`${SUPABASE_URL}/functions/v1/notify-janine`, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify(body)
-    });
-  } catch(e) { console.warn('Notification failed:', e.message); }
-}
+
 
 // ─────────────────────────────────────────────
 //  OFFLINE QUEUE
@@ -950,7 +1007,6 @@ async function flushOfflineQueue() {
       jobs = jobs.filter(j=>j.id!==_local_id);
       jobs.unshift(result[0]);
       clearFromQueue(_local_id);
-      await sendNotification(payload, payload.total);
       synced++;
     } catch(e) { console.warn('Queue flush failed:', e.message); }
   }
@@ -1019,8 +1075,16 @@ ALTER TABLE freight_jobs
 ALTER TABLE freight_jobs
   ADD CONSTRAINT freight_jobs_rate_type_check CHECK (rate_type IN ('km','hr','deck'));
 
--- photo_path stores 'sent' as a flag when a photo was emailed to Janine.
--- No Supabase storage bucket required for photo functionality.
+-- photo_path stores the file path in Supabase Storage (e.g. dockets/job-uuid.jpg)
+
+-- STORAGE BUCKET SETUP (one-time, done in Supabase UI):
+-- 1. Go to Supabase > Storage > New Bucket
+-- 2. Name it exactly: freight-dockets
+-- 3. Toggle "Public bucket" ON
+-- 4. Click Create Bucket
+--
+-- STORAGE SECURITY POLICY (run in SQL Editor after creating bucket):
+-- See separate storage RLS policy below.
 ══════════════════════════════════════════════════════ -->
 </body>
 </html>
