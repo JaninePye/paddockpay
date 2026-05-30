@@ -382,7 +382,7 @@
     <div class="field-group">
       <label>Docket Photo <span style="color:var(--grey);font-size:9px;">(optional — take photo or upload)</span></label>
       <div class="photo-upload-area" id="photo-upload-area">
-        <input type="file" id="f-photo" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+        <input type="file" id="f-photo" accept="image/*" onchange="handlePhotoSelect(event)">
         <div class="photo-upload-label" id="photo-upload-label">
           <span class="icon">📷</span>
           Tap to take photo or choose file
@@ -1102,5 +1102,8 @@ ALTER TABLE freight_jobs
 -- STORAGE SECURITY POLICY (run in SQL Editor after creating bucket):
 -- See separate storage RLS policy below.
 ══════════════════════════════════════════════════════ -->
+<!-- TEMPORARY DEBUG CONSOLE — REMOVE AFTER DIAGNOSIS -->
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
 </body>
 </html>
