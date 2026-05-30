@@ -439,8 +439,15 @@ const sb = {
   },
   async update(id, data) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`, { method:'PATCH', headers: this.headers, body: JSON.stringify(data) });
-    if (!r.ok) throw new Error(await r.text());
-    return r.json();
+    if (!r.ok) {
+      const errText = await r.text();
+      console.error('Supabase update error:', errText);
+      throw new Error(errText);
+    }
+    const text = await r.text();
+    // PATCH returns empty body if no rows matched — handle gracefully
+    if (!text || text === '[]' || text === '') return [];
+    try { return JSON.parse(text); } catch { return []; }
   },
   async delete(id) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/freight_jobs?id=eq.${id}`, { method:'DELETE', headers: this.headers });
@@ -900,9 +907,10 @@ async function saveJob() {
 
   try {
     if (editingId) {
-      const result = await sb.update(editingId, payload);
+      await sb.update(editingId, payload);
       const idx = jobs.findIndex(x => x.id === editingId);
-      const updatedJob = result[0] || { ...jobs[idx], ...payload };
+      // Merge payload into existing job record — don't rely on PATCH response body
+      const updatedJob = { ...(jobs[idx] || {}), ...payload, id: editingId };
       // Upload new photo to storage if selected during edit
       if (pendingPhotoFile) {
         try {
@@ -919,9 +927,14 @@ async function saveJob() {
       showToast('Job updated.');
     } else {
       const result = await sb.insert(payload);
-      const newJob = result[0];
+      const newJob = (Array.isArray(result) && result[0]) ? result[0] : payload;
+      // Ensure id is present — refetch if missing
+      if (!newJob.id) {
+        const fetched = await sb.get(`&client_name=eq.${encodeURIComponent(payload.client_name)}&job_date=eq.${payload.job_date}&order=created_at.desc&limit=1`);
+        if (fetched && fetched[0]) Object.assign(newJob, fetched[0]);
+      }
       // Upload photo to Supabase Storage if selected
-      if (pendingPhotoFile) {
+      if (pendingPhotoFile && newJob.id) {
         try {
           const path = await sb.uploadPhoto(newJob.id, pendingPhotoFile);
           await sb.update(newJob.id, { photo_path: path });
@@ -959,9 +972,12 @@ async function markInvoiced(id) {
   try {
     await sb.update(id, { status:'Invoiced', invoiced_at: new Date().toISOString() });
     const j = jobs.find(x=>x.id===id);
-    if(j) { j.status='Invoiced'; j.invoiced_at=new Date().toISOString(); }
+    if (j) { j.status='Invoiced'; j.invoiced_at=new Date().toISOString(); }
     renderJobs(); updateStats(); showToast('Marked as invoiced.');
-  } catch(e) { showToast('Update failed.', true); }
+  } catch(e) {
+    console.error('Mark invoiced failed:', e.message);
+    showToast('Failed to mark as invoiced. Check your connection.', true);
+  }
 }
 
 // ─────────────────────────────────────────────
